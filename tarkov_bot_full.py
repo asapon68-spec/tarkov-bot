@@ -162,8 +162,12 @@ async def on_message(message):
             inline=False,
         )
 
-        if TWITCH_URL:
-            embed.set_footer(text=f"Powered by {TWITCH_URL}")
+        # Footer with Tarkov-Market attribution + Twitch follow request (sparkle version)
+footer_text = "Prices from Tarkov-Market (https://tarkov-market.com)"
+if TWITCH_URL:
+    footer_text += f" | ✨ Follow my Twitch! → {TWITCH_URL} ✨"
+
+embed.set_footer(text=footer_text)
 
         await message.channel.send(embed=embed)
 

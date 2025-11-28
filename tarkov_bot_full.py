@@ -18,13 +18,13 @@ if not DISCORD_TOKEN:
     raise SystemExit("DISCORD_TOKEN が設定されていません")
 
 if not TARKOV_MARKET_API_KEY:
-    print("警告: TARKOV_MARKET_API_KEY が設定されていません。価格データは取得不可になります")
+    print("警告: TARKOV_MARKET_API_KEY がありません → 価格データ取得不可")
 
 # =========================
 # API ENDPOINTS
 # =========================
-TARKOV_DEV_ITEMS_URL = "https://api.tarkov.dev/graphql"
-TARKOV_MARKET_DETAILS_URL = "https://api.tarkov-market.app/api/v1/item/details/{}?x-api-key={}"
+TARKOV_DEV_URL = "https://api.tarkov.dev/graphql"
+TARKOV_MARKET_SEARCH_URL = "https://api.tarkov-market.app/api/v1/item?q={}&x-api-key={}"
 
 # =========================
 # Discord Settings
@@ -38,14 +38,14 @@ client = discord.Client(intents=intents)
 # =========================
 ITEM_NAMES = []
 ITEM_NAME_TO_ID = {}
+ITEM_NAME_TO_WIKI = {}
 
 # =========================
-# 日本語 → 英語 エイリアス
+# 日本語エイリアス
 # =========================
 ALIASES = {
-    "レドックス": "LEDX Skin Transilluminator",
-    "レドックススキン": "LEDX Skin Transilluminator",
     "グラボ": "Graphics card",
+    "レドックス": "LEDX Skin Transilluminator",
     "サレワ": "Salewa first aid kit",
     "グリズリー": "Grizzly first aid kit",
     "ガスアナ": "Gas analyzer",
@@ -53,82 +53,86 @@ ALIASES = {
 }
 
 # =========================
-# 全アイテム名をロード（tarkov.dev）
+# tarkov.dev から全アイテム + Wikiリンク取得
 # =========================
 def load_all_items():
-    global ITEM_NAMES, ITEM_NAME_TO_ID
+    global ITEM_NAMES, ITEM_NAME_TO_ID, ITEM_NAME_TO_WIKI
 
     query = """
     {
       items {
         id
         name
+        wikiLink
       }
     }
     """
 
     try:
-        print("tarkov.dev から全アイテム取得中...")
-        r = requests.post(TARKOV_DEV_ITEMS_URL, json={"query": query}, timeout=25)
+        print("tarkov.dev アイテム一覧取得中...")
+        r = requests.post(TARKOV_DEV_URL, json={"query": query}, timeout=25)
         r.raise_for_status()
 
-        data = r.json().get("data", {}).get("items", [])
-        ITEM_NAMES = [item["name"] for item in data]
-        ITEM_NAME_TO_ID = {item["name"]: item["id"] for item in data}
+        items = r.json().get("data", {}).get("items", [])
 
-        print(f"ロード完了: {len(ITEM_NAMES)} アイテム")
+        ITEM_NAMES = [item["name"] for item in items]
+        ITEM_NAME_TO_ID = {item["name"]: item["id"] for item in items}
+        ITEM_NAME_TO_WIKI = {item["name"]: item.get("wikiLink") for item in items}
+
+        print(f"ロード成功: {len(ITEM_NAMES)} アイテム")
 
     except Exception as e:
-        print("全アイテム取得エラー:", e)
+        print("アイテム一覧取得エラー:", e)
         ITEM_NAMES = []
         ITEM_NAME_TO_ID = {}
-
+        ITEM_NAME_TO_WIKI = {}
 
 # =========================
 # Fuzzy Match
 # =========================
-def fuzzy_match(user_input: str):
-    ui = user_input.strip()
+def fuzzy_match(text: str):
+    t = text.strip()
 
     # 日本語エイリアス優先
-    if ui in ALIASES:
-        return ALIASES[ui], 100
+    if t in ALIASES:
+        return ALIASES[t], 100
 
     if not ITEM_NAMES:
         return None, 0
 
-    result = process.extractOne(ui, ITEM_NAMES, scorer=fuzz.WRatio)
-    if result:
-        name, score, _ = result
+    match = process.extractOne(t, ITEM_NAMES, scorer=fuzz.WRatio)
+    if match:
+        name, score, _ = match
         return name, int(score)
 
     return None, 0
 
-
 # =========================
-# Tarkov Market 詳細API
+# Tarkov Market (通常API)
 # =========================
-def get_item_details(item_id: str):
-    if not TARKOV_MARKET_API_KEY:
-        return None
+def get_price_data(name: str):
     try:
-        url = TARKOV_MARKET_DETAILS_URL.format(item_id, TARKOV_MARKET_API_KEY)
+        url = TARKOV_MARKET_SEARCH_URL.format(requests.utils.quote(name), TARKOV_MARKET_API_KEY)
         r = requests.get(url, timeout=20)
         r.raise_for_status()
-        return r.json()
+
+        data = r.json()
+        if not data:
+            return None
+
+        return data[0]
+
     except Exception as e:
-        print("Tarkov-Market 詳細APIエラー:", e)
+        print("TarkovMarket 通常APIエラー:", e)
         return None
 
-
 # =========================
-# Discord BOT
+# BOT動作
 # =========================
 @client.event
 async def on_ready():
-    print(f"Bot 起動: {client.user}")
+    print(f"Bot起動: {client.user}")
     load_all_items()
-
 
 @client.event
 async def on_message(message: discord.Message):
@@ -137,52 +141,45 @@ async def on_message(message: discord.Message):
 
     content = message.content.strip()
 
-    # Help
+    # help
     if content.lower() == "!help":
         await message.channel.send(
             "使い方：`!アイテム名`\n例：`!ledx`, `!グラボ`, `!サレワ`"
         )
         return
 
-    # コマンドは "!" から始まる
+    # commands
     if not content.startswith("!"):
         return
 
-    # 検索ワード抽出
     query = content[1:].strip()
     if not query:
-        await message.channel.send("例：`!ledx` のように入力してください。")
+        await message.channel.send("例：`!ledx` のように入力してください")
         return
 
-    # Fuzzy検索
+    # fuzzy match
     name, score = fuzzy_match(query)
     if not name:
-        await message.channel.send("一致するアイテムが見つかりませんでした。")
+        await message.channel.send("一致するアイテムが見つかりません")
         return
 
     if score < FUZZY_THRESHOLD:
         await message.channel.send(
-            f"もしかして **{name}** (score {score})\n"
-            "もっと近い名前で入力してみてください。"
+            f"もしかして **{name}** ？ (score {score})\nもっと近い名前で再入力してください。"
         )
         return
 
-    # ID取得
-    item_id = ITEM_NAME_TO_ID.get(name)
-    if not item_id:
-        await message.channel.send("アイテムID取得に失敗しました。")
+    # price data
+    price = get_price_data(name)
+    if not price:
+        await message.channel.send("価格情報が取得できませんでした。")
         return
 
-    # 詳細取得
-    data = get_item_details(item_id)
-    if not data:
-        await message.channel.send("詳細データ取得エラー。")
-        return
-
-    # ======== 価格情報 ========
-    avg = data.get("avg24hPrice")
-    trader = data.get("traderName") or "----"
-    trader_price = data.get("traderPrice")
+    # price fields
+    avg = price.get("avg24hPrice")
+    trader = price.get("traderName") or "----"
+    trader_price = price.get("traderPrice")
+    icon = price.get("icon")
 
     def fmt(v):
         try:
@@ -193,7 +190,7 @@ async def on_message(message: discord.Message):
     avg_s = fmt(avg)
     trader_price_s = fmt(trader_price)
 
-    # Profit
+    # profit
     try:
         if avg and trader_price:
             profit = avg - trader_price
@@ -203,23 +200,21 @@ async def on_message(message: discord.Message):
     except:
         profit_s = "----"
 
-    # ======== Wiki URL ========
-    wiki_url = data.get("wikiLink", None)
+    # wiki url from tarkov.dev
+    wiki = ITEM_NAME_TO_WIKI.get(name)
 
-    # ======== EMBED ========
+    # embed
     embed = discord.Embed(
         title=name,
-        url=wiki_url if wiki_url else discord.Embed.Empty,
-        description=f"検索ワード: `{query}` / マッチ: `{name}` (score {score})",
+        url=wiki if wiki else discord.Embed.Empty,
+        description=f"検索: `{query}` / マッチ: `{name}` (score {score})",
         color=0x00AAFF
     )
 
-    # アイテム画像
-    icon = data.get("icon")
+    # item icon
     if icon:
         embed.set_thumbnail(url=icon)
 
-    # 価格情報
     embed.add_field(
         name="価格情報",
         value=(
@@ -230,14 +225,13 @@ async def on_message(message: discord.Message):
         inline=False
     )
 
-    # Footer
+    # footer
     footer = "Prices from Tarkov-Market (https://tarkov-market.com)"
     if TWITCH_URL:
         footer += f" | ✨ Follow my Twitch! → {TWITCH_URL} ✨"
     embed.set_footer(text=footer)
 
     await message.channel.send(embed=embed)
-
 
 # =========================
 # RUN

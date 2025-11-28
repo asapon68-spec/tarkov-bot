@@ -99,30 +99,40 @@ def load_all_items():
 def fuzzy_match(user_input: str):
     ui_raw = user_input.strip()
     if not ui_raw:
-        return None, 0
+        return []
 
     ui = ui_raw.lower()
+    matches = []
 
     # 1) 完全エイリアス一致
     if ui in ALIASES:
-        return ALIASES[ui], 100
+        # 完全一致が最優先なので、それをリストに入れて即座に返します
+        return [(ALIASES[ui], 100)] 
 
-    # 2) エイリアスの fuzzy
+    # 2) エイリアスの fuzzy (スコア85以上)
     alias_keys = list(ALIASES.keys())
-    alias_match = process.extractOne(ui, alias_keys, scorer=fuzz.WRatio)
-    if alias_match:
-        alias_key, alias_score, _ = alias_match
+    alias_matches = process.extract(ui, alias_keys, scorer=fuzz.WRatio, limit=3)
+    for alias_key, alias_score, _ in alias_matches:
         if alias_score >= 85:
-            return ALIASES[alias_key], int(alias_score)
-
-    # 3) 英語正式名に fuzzy
+            # 既にリストに含まれていないか確認してから追加
+            official_name = ALIASES[alias_key]
+            if official_name not in [m[0] for m in matches]:
+                matches.append((official_name, int(alias_score)))
+    
+    # 3) 英語正式名に fuzzy (常に実行し、上位の結果を取得)
     if ITEM_NAMES:
-        match = process.extractOne(ui_raw, ITEM_NAMES, scorer=fuzz.WRatio)
-        if match:
-            name, score, _ = match
-            return name, int(score)
+        # 英語正式名から上位5つを取得
+        official_matches = process.extract(ui_raw, ITEM_NAMES, scorer=fuzz.WRatio, limit=5)
+        for name, score, _ in official_matches:
+             # 既にリストに含まれていないか確認してから追加
+             if name not in [m[0] for m in matches]:
+                matches.append((name, int(score)))
 
-    return None, 0
+    # スコアで降順ソート
+    matches.sort(key=lambda x: x[1], reverse=True)
+    
+    # スコア60未満の結果は除外
+    return [m for m in matches if m[1] >= FUZZY_THRESHOLD]
 
 
 # =========================
@@ -184,17 +194,36 @@ async def on_message(message: discord.Message):
         return
 
     # Fuzzy + Alias検索
-    name, score = fuzzy_match(query)
-    if not name:
+    # NOTE: 
+    matches = fuzzy_match(query)
+    
+    if not matches:
         await message.channel.send(f"❌ `{query}` に一致するアイテムがありませんでした。")
         return
 
-    if score < FUZZY_THRESHOLD:
+    # 最もスコアの高いアイテムを取得
+    best_match_name, best_match_score = matches[0]
+
+    # スコアがしきい値未満の場合、候補一覧を返す
+    if best_match_score < FUZZY_THRESHOLD:
+        
+        # 上位5つを表示
+        top_matches = matches[:5]
+        
+        candidates = "\n".join(
+            [f"・**{name}** (スコア: {score})" for name, score in top_matches]
+        )
+        
         await message.channel.send(
-            f"もしかして **{name}** ? (score {score})\n"
-            "もう少し正確に入力してみてください。"
+            f"⚠️ **`{query}`** の類似度が低いです。(ベストマッチのスコア: {best_match_score})\n"
+            f"もしかして、以下のアイテムではありませんか？\n\n"
+            f"{candidates}\n\n"
+            "正確なアイテム名を再検索するか、エイリアスが未登録の場合は開発者にご連絡ください。"
         )
         return
+
+    # スコアが高く、ベストマッチが決まった場合、処理を続行
+    name = best_match_name
 
     # Tarkov-Market API
     price = get_price_data(name)

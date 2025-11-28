@@ -1,11 +1,12 @@
-# item_dictionary.py（完全版・SyntaxErrorゼロ）
+# item_dictionary.py
 # Escape from Tarkov アイテム辞書（日本語・英語・略称 対応）
 
-# ========================================
-# 🔥 レア・高額ルート
-# ========================================
-
 CANONICAL_ITEMS = [
+
+    # ======================================================
+    # 🔥 レア・高額ルート
+    # ======================================================
+
     {
         "name": "LEDX Skin Transilluminator",
         "aliases": [
@@ -15,27 +16,23 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "Graphics card",
-        "aliases": [
-            "gpu", "グラボ", "graphics", "graphic card", "グラフィックボード"
-        ],
+        "aliases": ["gpu", "グラボ", "ぐらぼ", "graphics", "graphic card", "グラフィックボード"],
     },
     {
         "name": "Physical Bitcoin",
-        "aliases": [
-            "bitcoin", "btc", "ビットコイン", "ビッコ"
-        ],
+        "aliases": ["bitcoin", "btc", "ビットコイン", "ビッコ", "コイン", "0.2btc"],
     },
     {
         "name": "Red Rebel ice pick",
-        "aliases": ["red rebel", "レッドレベル", "レドレベ", "アイスピッケル"],
+        "aliases": ["red rebel", "レッドレベル", "レッレベ", "レドレベ", "アイスピッケル"],
     },
     {
         "name": "Keytool",
-        "aliases": ["keytool", "キー工具", "キーケース"],
+        "aliases": ["keytool", "キー工具", "キーケース", "キー用ツール"],
     },
     {
         "name": "Item Case",
-        "aliases": ["item case", "アイテムケース", "アイケ"],
+        "aliases": ["item case", "アイテムケース", "アイテムケ", "アイケ"],
     },
     {
         "name": "Weapon Case",
@@ -43,57 +40,57 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "THICC Weapon Case",
-        "aliases": ["thicc weapon case", "thicc武器ケース"],
+        "aliases": ["thicc weapon case", "thicc武器ケース", "thicc武器", "シック武器ケース"],
     },
     {
         "name": "THICC Item Case",
-        "aliases": ["thicc item case", "シックケース"],
+        "aliases": ["thicc item case", "thiccアイテムケース", "シックケース", "シックアイテム"],
     },
 
-    # ========================================
+    # ======================================================
     # 🦁 置物・トレードアイテム
-    # ========================================
+    # ======================================================
 
     {
         "name": "Bronze lion figurine",
-        "aliases": ["bronze lion", "lion", "ライオン"],
+        "aliases": ["bronze lion", "lion", "ライオン", "らいおん"],
     },
     {
         "name": "Cat figurine",
-        "aliases": ["cat", "猫", "ネコ"],
+        "aliases": ["cat", "猫の置物", "ねこの置物", "ネコ", "キャット"],
     },
     {
         "name": "Horse figurine",
-        "aliases": ["horse", "馬", "馬像"],
+        "aliases": ["horse", "馬像", "うま像", "うまの置物"],
     },
     {
         "name": "Raven figurine",
-        "aliases": ["raven", "レイヴン", "カラス"],
+        "aliases": ["raven", "レイヴン", "カラス置物"],
     },
     {
         "name": "GP coin",
-        "aliases": ["gp", "gp coin", "gpコイン"],
+        "aliases": ["gp", "gp coin", "gpコイン", "金コイン"],
     },
     {
         "name": "Chain with Prokill medallion",
-        "aliases": ["prokill", "プロキル"],
+        "aliases": ["prokill", "プロキル", "プロキルチェーン"],
     },
     {
         "name": "Golden neck chain",
-        "aliases": ["goldchain", "金チェーン", "金ネックレス"],
+        "aliases": ["goldchain", "金チェーン", "gold chain", "金ネックレス"],
     },
     {
         "name": "Antique teapot",
-        "aliases": ["ティーポット", "古いポット"],
+        "aliases": ["ティーポット", "ポット", "古いポット"],
     },
     {
         "name": "Antique vase",
-        "aliases": ["vase", "花瓶"],
+        "aliases": ["vase", "花瓶", "骨董花瓶"],
     },
 
-    # ========================================
-    # 📦 工業品・素材系
-    # ========================================
+    # ======================================================
+    # 📦 クラフト素材・工業品
+    # ======================================================
 
     {
         "name": "Aramid fiber fabric",
@@ -113,11 +110,11 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "Paracord",
-        "aliases": ["パラコード"],
+        "aliases": ["パラコード", "para code"],
     },
     {
         "name": "FP-100 filter absorber",
-        "aliases": ["fp100", "fp-100"],
+        "aliases": ["fp-100", "fp100"],
     },
     {
         "name": "Water filter",
@@ -133,7 +130,7 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "Car battery",
-        "aliases": ["car battery", "バッテリー"],
+        "aliases": ["car battery", "車バッテリー", "バッテリー"],
     },
     {
         "name": "Spark plug",
@@ -141,20 +138,20 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "Wires",
-        "aliases": ["wires", "ワイヤー"],
+        "aliases": ["wires", "ワイヤー", "電線"],
     },
     {
         "name": "Insulating tape",
-        "aliases": ["tape", "絶縁テープ", "青テープ"],
+        "aliases": ["tape", "青テープ", "絶縁テープ"],
     },
     {
         "name": "Duct tape",
-        "aliases": ["duct tape", "ガムテ"],
+        "aliases": ["duct tape", "ガムテ", "銀ガムテ"],
     },
 
-    # ========================================
+    # ======================================================
     # 🧪 医療・薬品
-    # ========================================
+    # ======================================================
 
     {
         "name": "Grizzly First Aid Kit",
@@ -162,15 +159,15 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "CMS surgical kit",
-        "aliases": ["cms", "手術キット"],
+        "aliases": ["cms", "c.m.s", "手術キット"],
     },
     {
         "name": "Surv12 field surgical kit",
-        "aliases": ["surv12", "サブ12"],
+        "aliases": ["surv12", "サーブ12", "サブ12"],
     },
     {
         "name": "Salewa First Aid Kit",
-        "aliases": ["salewa", "サレワ"],
+        "aliases": ["salewa", "サレワ", "サリワ"],
     },
     {
         "name": "IFAK personal tactical first aid kit",
@@ -186,20 +183,20 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "SJ6 combat stimulant injector",
-        "aliases": ["sj6", "スジャ6"],
+        "aliases": ["sj6", "スジャ6", "走る薬"],
     },
     {
         "name": "Propital regenerative stimulant injector",
         "aliases": ["propital", "プロピタル"],
     },
 
-    # ========================================
-    # 🗝 キー類
-    # ========================================
+    # ======================================================
+    # 🗝 キー類（重要）
+    # ======================================================
 
     {
         "name": "Factory exit key",
-        "aliases": ["factory key", "赤鍵", "工場キー"],
+        "aliases": ["factory key", "工場キー", "赤鍵", "旧工場"],
     },
     {
         "name": "Dorm room 206 Key",
@@ -215,173 +212,137 @@ CANONICAL_ITEMS = [
     },
     {
         "name": "Sanitar's office key",
-        "aliases": ["sanitar key", "サニターキー"],
+        "aliases": ["sanitar key", "サニタールーム"],
+    },
+
+    # ======================================================
+    # 🔫 武器（アサルト / DMR / SMG）
+    # ======================================================
+
+    {
+        "name": "Kalashnikov AK-74 5.45x39 assault rifle",
+        "aliases": ["ak74", "ak 74", "エーケー74", "赤ak", "ak74n", "ak74m"],
+    },
+    {
+        "name": "Kalashnikov AK-74M 5.45x39 assault rifle",
+        "aliases": ["ak74m", "74m"],
+    },
+    {
+        "name": "Kalashnikov AK-74N 5.45x39 assault rifle",
+        "aliases": ["ak74n", "74n"],
+    },
+    {
+        "name": "Kalashnikov AKS-74U 5.45x39 assault rifle",
+        "aliases": ["aks74u", "クリンコフ", "くりんこふ", "短ak"],
+    },
+
+    {
+        "name": "Colt M4A1 5.56x45 assault rifle",
+        "aliases": ["m4", "m4a1", "m4a1 carbine", "エムフォー"],
+    },
+    {
+        "name": "HK 416A5 5.56x45 assault rifle",
+        "aliases": ["hk416", "416", "416a5"],
+    },
+    {
+        "name": "FN SCAR-L 5.56x45 assault rifle",
+        "aliases": ["scar l", "スカーl", "mk16"],
+    },
+    {
+        "name": "FN SCAR-H 7.62x51 assault rifle",
+        "aliases": ["scar h", "スカーh", "mk17"],
+    },
+
+    # ======================================================
+    # 💥 弾薬（Ammo）
+    # ======================================================
+
+    {
+        "name": "5.45x39mm BP",
+        "aliases": ["545bp", "bp545", "5.45bp"],
+    },
+    {
+        "name": "5.45x39mm BT",
+        "aliases": ["545bt", "bt545"],
+    },
+    {
+        "name": "5.45x39mm PP",
+        "aliases": ["545pp", "pp545"],
+    },
+
+    {
+        "name": "7.62x39mm BP",
+        "aliases": ["762bp", "bp762"],
+    },
+    {
+        "name": "7.62x39mm PS",
+        "aliases": ["762ps", "ps762"],
+    },
+
+    {
+        "name": "5.56x45mm M855",
+        "aliases": ["855", "m855"],
+    },
+    {
+        "name": "5.56x45mm M855A1",
+        "aliases": ["855a1", "m855a1", "a1"],
+    },
+    {
+        "name": "5.56x45mm M995",
+        "aliases": ["995", "m995"],
+    },
+
+    {
+        "name": "7.62x51mm M80",
+        "aliases": ["m80", "m80ball"],
+    },
+    {
+        "name": "7.62x51mm M61",
+        "aliases": ["m61", "m61ap"],
+    },
+    {
+        "name": "7.62x51mm M62",
+        "aliases": ["m62", "m62tracer"],
+    },
+
+    {
+        "name": "4.6x30mm AP SX",
+        "aliases": ["ap sx", "apsx", "4.6ap"],
+    },
+
+    {
+        "name": "9x19mm AP 6.3",
+        "aliases": ["ap63", "6.3", "ap6.3"],
+    },
+    {
+        "name": "9x19mm PST gzh",
+        "aliases": ["pst", "pstgzh"],
+    },
+    {
+        "name": "9x19mm RIP",
+        "aliases": ["rip", "rip9"],
+    },
+
+    {
+        "name": ".45 ACP AP",
+        "aliases": ["45ap", "ap45"],
+    },
+
+    {
+        "name": ".300 Blackout AP",
+        "aliases": ["300ap", "ap300"],
+    },
+
+    {
+        "name": ".338 Lapua Magnum AP",
+        "aliases": ["338ap", "ap338"],
     },
 ]
 
-# ========================================
-# 🔫 武器（アサルト / DMR / ボルト / SMG / LMG）
-# ========================================
-
-CANONICAL_ITEMS += [
-    # AKシリーズ
-    {"name": "Kalashnikov AK-74 5.45x39 assault rifle",
-     "aliases": ["ak74", "ak 74", "エーケー74", "ak74n", "ak74m"]},
-
-    {"name": "Kalashnikov AK-74M 5.45x39 assault rifle",
-     "aliases": ["ak74m", "74m"]},
-
-    {"name": "Kalashnikov AK-74N 5.45x39 assault rifle",
-     "aliases": ["ak74n", "74n"]},
-
-    {"name": "Kalashnikov AKS-74 5.45x39 assault rifle",
-     "aliases": ["aks74", "aks-74"]},
-
-    {"name": "Kalashnikov AKS-74U 5.45x39 assault rifle",
-     "aliases": ["aks74u", "クリンコフ"]},
-
-    {"name": "Kalashnikov AK-103 7.62x39 assault rifle",
-     "aliases": ["ak103", "103"]},
-
-    {"name": "Kalashnikov AK-104 7.62x39 assault rifle",
-     "aliases": ["ak104", "104"]},
-
-    {"name": "Kalashnikov AK-105 5.45x39 assault rifle",
-     "aliases": ["ak105", "105"]},
-
-    {"name": "Kalashnikov AKM 7.62x39 assault rifle",
-     "aliases": ["akm", "エーケーエム"]},
-
-    {"name": "Kalashnikov AKMN 7.62x39 assault rifle",
-     "aliases": ["akmn", "mn"]},
-
-    # AR系
-    {"name": "Colt M4A1 5.56x45 assault rifle",
-     "aliases": ["m4", "m4a1", "エムフォー"]},
-
-    {"name": "HK 416A5 5.56x45 assault rifle",
-     "aliases": ["hk416", "416"]},
-
-    {"name": "FN SCAR-L 5.56x45 assault rifle",
-     "aliases": ["scar l", "スカーl", "mk16"]},
-
-    {"name": "FN SCAR-H 7.62x51 assault rifle",
-     "aliases": ["scar h", "スカーh", "mk17"]},
-
-    # DMR
-    {"name": "SWORD International Mk-18 .338 LM marksman rifle",
-     "aliases": ["mk18", "ミョルニル"]},
-
-    {"name": "Knight's Armament Company SR-25 7.62x51 marksman rifle",
-     "aliases": ["sr25"]},
-
-    {"name": "HK G28 7.62x51 marksman rifle",
-     "aliases": ["g28"]},
-
-    {"name": "Remington R11 RSASS 7.62x51 marksman rifle",
-     "aliases": ["rsass"]},
-
-    # ボルト
-    {"name": "ORSIS T-5000M 7.62x51 bolt-action sniper rifle",
-     "aliases": ["t5000"]},
-
-    {"name": "Mosin 7.62x54R bolt-action rifle",
-     "aliases": ["mosin", "モシン"]},
-
-    {"name": "Marlin MXLR .308ME lever-action rifle",
-     "aliases": ["mxlr"]},
-
-    {"name": "Remington Model 700 7.62x51 bolt-action sniper rifle",
-     "aliases": ["m700", "700"]},
-
-    # SMG
-    {"name": "HK MP5 9x19 submachine gun",
-     "aliases": ["mp5"]},
-
-    {"name": "HK MP7A1 4.6x30 submachine gun",
-     "aliases": ["mp7"]},
-
-    {"name": "HK MP7A2 4.6x30 submachine gun",
-     "aliases": ["mp7a2"]},
-
-    {"name": "KRISS Vector .45 ACP submachine gun",
-     "aliases": ["vector", "ベクター"]},
-
-    {"name": "KRISS Vector 9x19 submachine gun",
-     "aliases": ["vector9"]},
-
-    # LMG
-    {"name": "Kalashnikov PKM 7.62x54R machine gun",
-     "aliases": ["pkm"]},
-
-    {"name": "Kalashnikov PKP 7.62x54R machine gun Pecheneg",
-     "aliases": ["pkp"]},
-
-    {"name": "RPK-16 5.45x39 light machine gun",
-     "aliases": ["rpk16"]},
-
-    # ピストル
-    {"name": "Glock 17 9x19 pistol",
-     "aliases": ["g17", "glock17"]},
-
-    {"name": "Glock 18C 9x19 pistol",
-     "aliases": ["g18"]},
-
-    {"name": "SIG P226R 9x19 pistol",
-     "aliases": ["p226"]},
-
-    {"name": "Colt M1911A1 .45 ACP pistol",
-     "aliases": ["m1911", "1911"]},
-]
-
-# ========================================
-# 💥 弾薬
-# ========================================
-
-CANONICAL_ITEMS += [
-    # 5.45
-    {"name": "5.45x39mm BP", "aliases": ["545bp"]},
-    {"name": "5.45x39mm BT", "aliases": ["545bt"]},
-    {"name": "5.45x39mm PP", "aliases": ["545pp"]},
-
-    # 7.62x39
-    {"name": "7.62x39mm BP", "aliases": ["762bp"]},
-    {"name": "7.62x39mm PS", "aliases": ["762ps"]},
-
-    # 5.56
-    {"name": "5.56x45mm M855", "aliases": ["855"]},
-    {"name": "5.56x45mm M855A1", "aliases": ["855a1", "a1"]},
-    {"name": "5.56x45mm M995", "aliases": ["995"]},
-
-    # 7.62x51
-    {"name": "7.62x51mm M80", "aliases": ["m80"]},
-    {"name": "7.62x51mm M61", "aliases": ["m61"]},
-    {"name": "7.62x51mm M62", "aliases": ["m62"]},
-
-    # 4.6
-    {"name": "4.6x30mm AP SX", "aliases": ["apsx"]},
-
-    # 9x19
-    {"name": "9x19mm AP 6.3", "aliases": ["ap63", "6.3"]},
-    {"name": "9x19mm PST gzh", "aliases": ["pst"]},
-    {"name": "9x19mm RIP", "aliases": ["rip"]},
-
-    # .45 ACP
-    {"name": ".45 ACP AP", "aliases": ["45ap"]},
-
-    # .300 BLK
-    {"name": ".300 Blackout AP", "aliases": ["300ap"]},
-
-    # .338 LM
-    {"name": ".338 Lapua Magnum AP", "aliases": ["338ap"]},
-]
-
-# ========================================
-# 🔄 Alias 自動生成
-# ========================================
-
+# 辞書生成
 ITEM_ALIASES = {}
+
 for item in CANONICAL_ITEMS:
     name = item["name"]
     for alias in item["aliases"]:
-        ITEM_ALIASES[alias.lower()] = name
+        ITEM_ALIASES[alias.strip().lower()] = name

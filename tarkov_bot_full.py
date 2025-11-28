@@ -11,6 +11,7 @@ TWITCH_URL = os.getenv("TWITCH_URL","").strip()
 FUZZY_THRESHOLD = int(os.getenv("FUZZY_THRESHOLD","60"))
 
 intents = discord.Intents.default()
+intents.message_content = True
 client = discord.Client(intents=intents)
 
 # アイテムリスト

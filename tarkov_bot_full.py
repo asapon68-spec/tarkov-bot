@@ -1,145 +1,140 @@
 # ==============================
 #  Escape from Tarkov Discord Bot
 #  アイテム検索 + Wikiリンク + Twitch宣伝
-#  完全版 / 曖昧検索 / 重複なし
-#  Tokenは環境変数 DISCORD_TOKEN から取得
+#  A版（import os 対応）
+#  完全復元版
 # ==============================
 
 import os
 import discord
-from rapidfuzz import fuzz, process
+import requests
+from rapidfuzz import process, fuzz
 
-# ======================================================
-# 1. Discord BOT Token（Render / ローカル共通）
-# ======================================================
-TOKEN = os.getenv("DISCORD_TOKEN")  # Render の Environment で設定
-if TOKEN is None:
-    print("❌ ERROR: DISCORD_TOKEN が設定されていません！")
-    print("Render → Environment → DISCORD_TOKEN を追加してください。")
+# ---------------------------------------
+# 1. Discord BOT 設定
+# ---------------------------------------
 
-# 任意：特定チャンネルだけ反応させたい場合設定
-CHANNEL_ID = None  # 例: 1234567890（制限しないなら None のまま）
+TOKEN = os.getenv("DISCORD_TOKEN")  # ← OSから読み取るバージョン
+CHANNEL_ID = None  # 特定チャンネルに制限しないなら None
 
-# ======================================================
-# 2. Discord Intents
-# ======================================================
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
 
-# ======================================================
-# 3. Tarkov アイテム辞書（日本語・英語・略称 全て対応）
-# ======================================================
+# ---------------------------------------
+# 2. タルコフ辞書（略称・日本語OK）
+# ---------------------------------------
 
-ITEM_DATA = {
-    # ───────────────────────────────────────────────
-    # ここはサンプル。あなたが送ってくれた膨大なデータに合わせて
-    # 後でいくらでも増やせる。  
-    # 実際は巨大辞書になるので必要なら分割も可能。
-    # ───────────────────────────────────────────────
-    "42 Signature Blend English Tea": {
-        "jp": "42 シグニチャーブレンド 英国紅茶",
-        "alias": ["42", "紅茶", "シグニチャー", "サインティー"],
-        "wiki": "https://escapefromtarkov.wiki.gg/wiki/42_Signature_Blend_English_Tea"
-    },
-    "Apollo Soyuz cigarettes": {
-        "jp": "アポロ ソユーズ シガレット",
-        "alias": ["Apollo", "アポロ", "タバコ"],
-        "wiki": "https://escapefromtarkov.wiki.gg/wiki/Apollo_Soyuz_cigarettes"
-    },
-    "Aramid fiber fabric": {
-        "jp": "アラミド繊維の生地",
-        "alias": ["Aramid", "アラミド"],
-        "wiki": "https://escapefromtarkov.wiki.gg/wiki/Aramid_fiber_fabric"
-    },
-    "BEAR Buddy plush toy": {
-        "jp": "BEAR バディのぬいぐるみ",
-        "alias": ["BEAR Buddy", "クマぬいぐるみ"],
-        "wiki": "https://escapefromtarkov.wiki.gg/wiki/BEAR_Buddy_plush_toy"
-    },
-    "Can of Dr. Lupo's coffee beans": {
-        "jp": "Dr. Lupo's コーヒー豆",
-        "alias": ["DrLupo", "ルポコーヒー"],
-        "wiki": "https://escapefromtarkov.wiki.gg/wiki/Can_of_Dr._Lupo%27s_coffee_beans"
-    },
-    # ───────────────────────────────────────────────
-    # あなたが送ってくれた「全アイテム・全武器」データは
-    # 後でここに巨大辞書として合体させる。
-    # 今は BOT の完全動作品として最低限構造だけ保持。
-    # ───────────────────────────────────────────────
+ITEM_DICT = {
+    "GPU": "Graphics card",
+    "グラボ": "Graphics card",
+    "ビットコイン": "Physical Bitcoin",
+    "bitcoin": "Physical Bitcoin",
+    "レッドレベル": "Red Rebel ice pick",
+    "red rebel": "Red Rebel ice pick",
+    "prokill": "Chain with Prokill medallion",
+    "goldchain": "Golden neck chain",
+    "ライオン": "Bronze lion figurine",
+    "lion": "Bronze lion figurine",
+    "ledx": "LEDX Skin Transilluminator",
+    "ledx 光るやつ": "LEDX Skin Transilluminator",
+    "ガラナ": "Sodium bicarbonate",
 }
 
-# alias（略称）を辞書のキーとしても使えるように展開
-ALIAS_MAP = {}
-for name, data in ITEM_DATA.items():
-    # メイン名
-    ALIAS_MAP[name.lower()] = name
-    # 日本語
-    ALIAS_MAP[data["jp"].lower()] = name
-    # 略称
-    for a in data.get("alias", []):
-        ALIAS_MAP[a.lower()] = name
+# ---------------------------------------
+# 3. Wiki URL 自動生成
+# ---------------------------------------
 
-SEARCH_KEYS = list(ALIAS_MAP.keys())
+def generate_wiki_url(item_name):
+    base = "https://escapefromtarkov.fandom.com/wiki/"
+    return base + item_name.replace(" ", "_")
 
-# ======================================================
-# 4. アイテム検索 関数（曖昧検索）
-# ======================================================
-def search_item(query: str):
-    query = query.lower()
-    best_match, score, _ = process.extractOne(
-        query, SEARCH_KEYS, scorer=fuzz.WRatio
-    )
-    if score < 60:
-        return None  # ヒットしないとき
-    real_name = ALIAS_MAP[best_match]
-    return real_name, ITEM_DATA[real_name]
+# ---------------------------------------
+# 4. Tarkov.dev API 取得
+# ---------------------------------------
 
-# ======================================================
-# 5. Discord イベント
-# ======================================================
-@client.event
-async def on_ready():
-    print(f"Bot logged in as {client.user}")
+def get_api_data(item_name):
+    url = "https://api.tarkov.dev/graphql"
+    query = """
+    query($name:String!) {
+      items(name:$name) {
+        name
+        shortName
+        wikiLink
+        avg24hPrice
+        traderPrices {
+          price
+          trader {
+            name
+          }
+        }
+      }
+    }
+    """
+    try:
+        r = requests.post(url, json={"query": query, "variables": {"name": item_name}})
+        data = r.json()
+        return data["data"]["items"]
+    except:
+        return None
+
+# ---------------------------------------
+# 5. メッセージイベント
+# ---------------------------------------
 
 @client.event
 async def on_message(message):
     if message.author.bot:
         return
-
-    # チャンネル制限
-    if CHANNEL_ID is not None and message.channel.id != CHANNEL_ID:
+    if CHANNEL_ID and message.channel.id != CHANNEL_ID:
         return
 
-    query = message.content.strip()
-    result = search_item(query)
+    user_query = message.content.strip()
 
-    if result is None:
-        return  # 反応しない（静かに無視）
+    if len(user_query) < 2:
+        return
 
-    name, data = result
+    # --- ① 辞書で判定 ---
+    match = process.extractOne(user_query, ITEM_DICT.keys(), scorer=fuzz.token_sort_ratio)
 
-    # ============ Embed 生成 ============
+    if match and match[1] > 75:
+        fixed_name = ITEM_DICT[match[0]]
+    else:
+        fixed_name = user_query  # 辞書がはずれたらそのまま検索
+
+    # --- ② API検索 ---
+    results = get_api_data(fixed_name)
+
+    if not results:
+        await message.channel.send("❌ 該当アイテムが見つかりませんでした…")
+        return
+
+    item = results[0]
+
+    # --- ③ Embed 生成 ---
     embed = discord.Embed(
-        title=f"🔎 {data['jp']} / {name}",
-        description="タルコフ アイテム情報",
-        color=0x00ccff
+        title=item["name"],
+        description=f"**検索ワード：** {user_query}",
+        color=0x2ecc71
     )
 
-    embed.add_field(name="英語名", value=name, inline=False)
-    embed.add_field(name="日本語名", value=data["jp"], inline=False)
-    embed.add_field(name="Wiki", value=data["wiki"], inline=False)
+    embed.add_field(name="Wiki", value=f"[開く]({item['wikiLink']})", inline=False)
+    embed.add_field(name="24h平均価格", value=f"{item['avg24hPrice']}₽", inline=True)
 
-    # Twitch 宣伝（固定位置）
-    embed.add_field(
-        name="📺 Twitch",
-        value="https://www.twitch.tv/jagamiorochi",
-        inline=False
-    )
+    trader_text = ""
+    for tp in item["traderPrices"]:
+        trader_text += f"**{tp['trader']['name']}**：{tp['price']}₽\n"
+    if trader_text == "":
+        trader_text = "データなし"
+
+    embed.add_field(name="トレーダー買取", value=trader_text, inline=False)
+
+    embed.set_footer(text="Twitch: https://www.twitch.tv/jagamiorochi")
 
     await message.channel.send(embed=embed)
 
-# ======================================================
-# 6. BOT 実行
-# ======================================================
+# ---------------------------------------
+# 6. BOT 起動
+# ---------------------------------------
+
 client.run(TOKEN)

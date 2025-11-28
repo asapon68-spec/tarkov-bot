@@ -11,7 +11,10 @@ load_dotenv()
 
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
 TARKOV_MARKET_API_KEY = os.getenv("TARKOV_MARKET_API_KEY", "").strip()
-TWITCH_URL = os.getenv("TWITCH_URL", "https://www.twitch.tv/jagamiorochi").strip()
+
+# ★ 修正：正しい Twitch URL に変更
+TWITCH_URL = os.getenv("TWITCH_URL", "https://www.twitch.tv/jagami_orochi").strip()
+
 FUZZY_THRESHOLD = int(os.getenv("FUZZY_THRESHOLD", "60"))
 
 if not DISCORD_TOKEN:
@@ -89,7 +92,7 @@ def fuzzy_match(query: str):
     q = query.strip().lower()
     results = []
 
-    # 1) エイリアス完全一致
+    # 1) 完全エイリアス一致
     if q in ALIASES:
         return [(ALIASES[q], 100)]
 
@@ -104,15 +107,13 @@ def fuzzy_match(query: str):
         for name, score, _ in process.extract(query, ITEM_NAMES, scorer=fuzz.WRatio, limit=5):
             results.append((name, int(score)))
 
-    # 重複削除 & スコア順ソート
+    # 重複除去 & スコア順
     uniq = {}
     for name, score in results:
         if name not in uniq or score > uniq[name]:
             uniq[name] = score
 
     sorted_results = sorted(uniq.items(), key=lambda x: x[1], reverse=True)
-
-    # しきい値以下は除外
     return [(name, s) for name, s in sorted_results if s >= FUZZY_THRESHOLD]
 
 # =========================
@@ -144,11 +145,6 @@ async def on_message(message):
 
     content = message.content.strip()
 
-    # help
-    if content.lower() == "!help":
-        await message.channel.send("使い方：`!ledx`, `!グラボ`, `!salewa`, `!m4` など")
-        return
-
     if not content.startswith("!"):
         return
 
@@ -156,15 +152,14 @@ async def on_message(message):
     if not query:
         return
 
-    # Fuzzy + Alias
     matches = fuzzy_match(query)
     if not matches:
-        await message.channel.send(f"❌ `{query}` に一致するアイテムなし")
+        await message.channel.send(f"❌ `{query}` に一致なし")
         return
 
     name, score = matches[0]
-
     price = get_price_data(name)
+
     if not price:
         await message.channel.send("❌ 価格情報が取得できませんでした")
         return
@@ -180,9 +175,6 @@ async def on_message(message):
             return f"{int(v):,}₽"
         except:
             return "----"
-
-    avg_s = fmt(avg)
-    trader_s = fmt(trader_price)
 
     profit = "----"
     try:
@@ -203,8 +195,8 @@ async def on_message(message):
     embed.add_field(
         name="💰 価格情報",
         value=(
-            f"フリマ平均：**{avg_s}**\n"
-            f"トレーダー最高買取：**{trader}（{trader_s}）**\n"
+            f"フリマ平均：**{fmt(avg)}**\n"
+            f"トレーダー最高買取：**{trader}（{fmt(trader_price)}）**\n"
             f"差額：**{profit}**"
         ),
         inline=False,
@@ -212,9 +204,7 @@ async def on_message(message):
 
     embed.set_footer(text="Prices from Tarkov-Market")
 
-    # =============================
-    #  ⭐ Twitch フォローボタン（蛇神オロチ）
-    # =============================
+    # Twitchボタン
     view = discord.ui.View()
     follow_button = discord.ui.Button(
         label="✨ FOLLOW 蛇神オロチ ON TWITCH ✨",

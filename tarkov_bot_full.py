@@ -1,4 +1,4 @@
- import os
+import os
 import requests
 from dotenv import load_dotenv
 from rapidfuzz import process, fuzz

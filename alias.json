@@ -130,5 +130,29 @@
   ],
   "Military COFDM wireless signal transmitter": [
     "cofdm"
+ {
+  "Graphics card": [
+    "gpu",
+    "グラボ",
+    "ぐらぼ"
+  ],
+  "Gas analyzer": [
+    "gasu",
+    "ガスアナ",
+    "がすあな"
+  ],
+
+  "Health Resort east wing room 310 key": [
+    "310"
+  ],
+  "Health Resort west wing room 306 key": [
+    "306"
+  ],
+  "Health Resort east wing room 218 key": [
+    "218"
+  ],
+  "Dorm room 110 key": [
+    "110"
   ]
+
 }

@@ -155,7 +155,7 @@
 
   "UMP .45 ACP": ["ump"],
 
-  "KRISS Vector .45 ACP (Black)": [
+  "KRISS Vector .45 ACP": [
     "vector45",
     "vec45",
     "kriss45",
@@ -165,7 +165,7 @@
     "黒",
     "黒ベク"
   ],
-  "KRISS Vector 9x19 (White)": [
+  "KRISS Vector 9x19": [
     "vector9",
     "vec9",
     "kriss9",
@@ -176,7 +176,7 @@
     "白ベク"
   ],
 
-  "Desert Tech MDR 5.56x45 (White)": [
+  "Desert Tech MDR 5.56x45": [
     "mdr556",
     "556mdr",
     "whitemdr",
@@ -185,7 +185,7 @@
     "白",
     "白mdr"
   ],
-  "Desert Tech MDR 7.62x51 (Black)": [
+  "Desert Tech MDR 7.62x51": [
     "mdr762",
     "762mdr",
     "blackmdr",

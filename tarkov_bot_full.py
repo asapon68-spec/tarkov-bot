@@ -120,10 +120,10 @@ async def on_message(message):
     )
 
     embed.add_field(
-        name="🔗 Twitch",
-        value=f"[CLICK HERE]({TWITCH_URL})",
-        inline=False
-    )
+    name="",
+    value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
+    inline=False
+)
 
     await message.channel.send(embed=embed)
 

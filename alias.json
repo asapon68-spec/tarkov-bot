@@ -85,4 +85,567 @@
   "9x19 AP 6.3": ["ap63"],
   "5.45x39 BS": ["bs"],
   "9x39 BP": ["bp"]
+  "Reap-IR thermal scope": [
+  "reap",
+  "riap",
+  "りーぷ"
+],
+"FLIR RS-32 2.25-9x 35mm 60Hz thermal riflescope": [
+  "flir",
+  "ふりる"
+],
+"Red Rebel ice pick": [
+  "redrebel",
+  "rebel",
+  "れっれべ"
+],
+"Lab. keycard Blue": [
+  "blue",
+  "aoblue",
+  "青"
+],
+"Lab. keycard Green": [
+  "green",
+  "midori",
+  "緑"
+],
+"Lab. keycard Black": [
+  "black",
+  "kuro",
+  "黒"
+],
+"Lab. keycard Violet": [
+  "violet",
+  "vio",
+  "紫"
+],
+"Lab. keycard Red": [
+  "red",
+  "aka",
+  "赤"
+],
+"Lab. keycard Yellow": [
+  "yellow",
+  "ki",
+  "黄"
+],
+"RB-BK key": [
+  "rbbk",
+  "bk",
+  "びーけー"
+],
+"RB-PSP1 key": [
+  "psp1",
+  "psp"
+],
+"RB-PSP2 key": [
+  "psp2"
+],
+"RB-PKPM key": [
+  "pkpm"
+],
+"RB-MP21 key": [
+  "mp21"
+],
+"RB-MP22 key": [
+  "mp22"
+],
+"RB-MP23 key": [
+  "mp23"
+],
+"RB-MP13 key": [
+  "mp13"
+],
+"Red keycard": [
+  "rkey",
+  "rkc",
+  "redkc"
+],
+"Green keycard": [
+  "gkey",
+  "gkc"
+],
+"Violet keycard": [
+  "vkey",
+  "vkc"
+],
+"Water filter": [
+  "filter",
+  "waterfilter",
+  "ぴるたー"
+],
+"Corrugated hose": [
+  "hose",
+  "ほーす",
+  "ホース"
+],
+"Sodium bicarbonate": [
+  "bica",
+  "びか"
+],
+"H2O2 Hydrogen peroxide": [
+  "h2o2",
+  "えいち"
+],
+"Vintage Beef Stew": [
+  "beef",
+  "びーふ"
+],
+"Can of Hot Rod energy drink": [
+  "rod",
+  "hotrod",
+  "ほっとろっど"
+],
+"Can of soda 'Apple Juice'": [
+  "juice",
+  "じゅーす"
+],
+"Golden rooster": [
+  "rooster",
+  "ごーるど"
+],
+"Bronze lion": [
+  "lion",
+  "らいおん",
+  "ライオン"
+],
+"Raven figurine": [
+  "raven",
+  "れいぶん"
+]
+"IFAK individual first aid kit": [
+  "ifak",
+  "あいふぁっく"
+],
+"AFAK personal first aid kit": [
+  "afak",
+  "えーふぁっく"
+],
+"Car first aid kit": [
+  "car",
+  "かーきっと"
+],
+"AI-2 medkit": [
+  "ai2",
+  "あいつー"
+],
+"Grizzly medical kit": [
+  "griz",
+  "grizzly",
+  "ぐりず"
+],
+"SJJ6 T stimulant injector": [
+  "sj6",
+  "えすじぇー"
+],
+"SJ1 T stimulant injector": [
+  "sj1"
+],
+"ETG change regenerative stimulant injector": [
+  "etg"
+],
+"Adrenaline injector": [
+  "adrene",
+  "adrenaline",
+  "どーぱみん"
+],
+"Propital": [
+  "propi",
+  "ぷろぴ"
+],
+"Morphine injector": [
+  "morph",
+  "morfi"
+],
+"Ibuprofen painkiller": [
+  "ibu",
+  "ibuprofen"
+],
+"Analgin painkillers": [
+  "analgin",
+  "あなるじん",
+  "あなる"
+],
+"Vaseline balm": [
+  "vaseline",
+  "vase",
+  "ばせりん",
+  "バセリン"
+],
+"GoldenStar balm": [
+  "goldstar",
+  "gold",
+  "ごるすた"
+],
+"Alu splint": [
+  "splint",
+  "split",
+  "すぷりんと"
+],
+"Surv12 field surgical kit": [
+  "surv12",
+  "surv",
+  "さーぶ"
+],
+"CMS surgical kit": [
+  "cms"
+],
+"Water": [
+  "wata",
+  "みず",
+  "水"
+],
+"Can of Hot Rod energy drink": [
+  "rod",
+  "hotrod"
+],
+"Can of TarCola soda": [
+  "cola",
+  "こーら"
+],
+"Can of Maxim energy drink": [
+  "maxim",
+  "max",
+  "まっくす"
+],
+"Can of Lime juice": [
+  "lime",
+  "らいむ"
+],
+"Can of Squash Spread": [
+  "squash",
+  "すくわっしゅ"
+],
+"Can of condensed milk": [
+  "milk",
+  "miruku",
+  "みるく"
+],
+"Slickers chocolate bar": [
+  "slick",
+  "sli",
+  "しりかーず"
+],
+"Crackers": [
+  "crack",
+  "くりゅ"
+],
+"Emelya rye croutons": [
+  "emelya",
+  "えめりゃ"
+],
+"Army crackers": [
+  "army",
+  "くれーかー"
+],
+"Hot Rod": [
+  "rod"
+],
+"Chocolate bar Alionka": [
+  "alionka",
+  "ありおんか"
+],
+"Can of humpback salmon": [
+  "salmon",
+  "さーもん"
+],
+"Pack of oatflakes": [
+  "oats",
+  "おーつ"
+],
+"Pack of sugar": [
+  "sugar",
+  "suga",
+  "砂糖"
+]
+"AK-74N": [
+  "ak74n",
+  "74n",
+  "よんなな"
+],
+"AKS-74U": [
+  "aksu",
+  "aks74u",
+  "すー",
+  "ゆー"
+],
+"AKM": [
+  "akm",
+  "えーけーえむ"
+],
+"AKMN": [
+  "akmn",
+  "えーけーえむえぬ"
+],
+"AK-103": [
+  "103",
+  "いちまるさん",
+  "ひゃくさん"
+],
+"AK-101": [
+  "101",
+  "いちまるいち"
+],
+"HK 416A5": [
+  "416",
+  "416a5",
+  "よんいちろく",
+  "HK"
+],
+"ADAR 2-15": [
+  "adar",
+  "えーだー"
+],
+"M4A1": [
+  "m4",
+  "えむよん",
+  "えむふぉー"
+],
+"MCX .300": [
+  "mcx",
+  "えむしーえっくす"
+],
+"SCAR-L 5.56x45": [
+  "scarl",
+  "すかーえる",
+  "すかー"
+],
+"SCAR-H 7.62x51": [
+  "scarh",
+  "すかーえっち"
+],
+"RSASS": [
+  "rsass",
+  "あーさす"
+],
+"SR-25": [
+  "sr25",
+  "えすあーる"
+],
+"MK-18 .338": [
+  "mk18",
+  "mk",
+  "えむけー"
+],
+"VSS Vintorez": [
+  "vss",
+  "びさす",
+  "びーえすえす"
+],
+"AS VAL": [
+  "val",
+  "ばる"
+],
+"SA-58": [
+  "sa58",
+  "さごっぱ"
+],
+"MP7A1": [
+  "mp7",
+  "えむぴー"
+],
+"MP-155 12ga shotgun": [
+  "155",
+  "mp155"
+],
+"Mosin bolt-action rifle": [
+  "mosin",
+  "もーしん"
+],
+"SV-98 bolt-action sniper rifle": [
+  "sv98",
+  "えすぶい"
+],
+"RPK-16": [
+  "rpk",
+  "あーるぴーけー"
+],
+"P90": [
+  "p90",
+  "ぴーきゅー"
+],
+"MP5": [
+  "mp5"
+],
+"Glock 17 9x19": [
+  "glock",
+  "g17",
+  "ぐろっく"
+],
+"TT pistol 7.62x25 TT": [
+  "tt",
+  "てぃーてぃー"
+]
+"AK-74M": [
+  "74m",
+  "よんななえむ"
+],
+"AK-105": [
+  "105",
+  "いちまるご"
+],
+"AK-102": [
+  "102"
+],
+"AK-104": [
+  "104"
+],
+"AK-545": [
+  "545",
+  "ごーよんごー"
+],
+"AK-762": [
+  "762",
+  "ななろくに"
+],
+"AN-94": [
+  "an94",
+  "あんな"
+],
+"RD-704": [
+  "704",
+  "ななまるよん"
+],
+"Mk47 Mutant": [
+  "mutant",
+  "みゅーたんと"
+],
+"TX-15 DML": [
+  "tx15",
+  "てぃーえっくす"
+],
+"G36": [
+  "g36"
+],
+"G36C": [
+  "g36c"
+],
+"HK G28": [
+  "g28"
+],
+"Desert Tech MDR 5.56x45": [
+  "mdr",
+  "mdr556"
+],
+"Desert Tech MDR 7.62x51": [
+  "mdr762"
+],
+"SVT-40": [
+  "svt",
+  "すぶてぃ"
+],
+"T-5000M": [
+  "t5000",
+  "てぃーごせん"
+],
+"AXMC .338 LM bolt-action sniper rifle": [
+  "axmc",
+  "えーえっくす"
+],
+"DSR-1": [
+  "dsr",
+  "でぃーえすあーる"
+],
+"M700 sniper rifle": [
+  "m700"
+],
+"VPO-215 'Gornostay'": [
+  "215"
+],
+"VPO-101 'Vepr' Hunter": [
+  "hunter",
+  "はんたー"
+],
+"SVD": [
+  "svd"
+],
+"UMP .45 ACP": [
+  "ump",
+  "うんぷ"
+],
+"KRISS Vector .45 ACP": [
+  "vector",
+  "べくたー"
+],
+"P90": [
+  "p90"
+],
+"PPSh-41": [
+  "ppsh",
+  "ぴーぴーえすえいち"
+],
+"PP-19-01 Vityaz-SN": [
+  "vityaz",
+  "びちゃず"
+],
+"Saiga-12": [
+  "saiga",
+  "さいが"
+],
+"MP-153": [
+  "153"
+],
+"MP-133": [
+  "133"
+],
+"M870": [
+  "870"
+],
+"KS-23M": [
+  "ks23"
+],
+"USP .45": [
+  "usp"
+],
+"FN Five-seveN": [
+  "57",
+  "ごーなな"
+],
+"P226R": [
+  "p226"
+]
+"Desert Tech MDR 5.56x45": [
+  "mdr556",
+  "556mdr",
+  "whitemdr",
+  "white",
+  "しろ",
+  "白",
+  "白mdr"
+],
+"Desert Tech MDR 7.62x51": [
+  "mdr762",
+  "762mdr",
+  "blackmdr",
+  "black",
+  "くろ",
+  "黒",
+  "黒mdr"
+]
+"KRISS Vector .45 ACP": [
+  "vector45",
+  "vec45",
+  "45vector",
+  "kriss45",
+  "blackvector",
+  "blackvec",
+  "black",
+  "くろ",
+  "黒",
+  "黒ベク",
+  "べく",
+  "べくたー"
+],
+"KRISS Vector 9x19": [
+  "vector9",
+  "vec9",
+  "9vector",
+  "kriss9",
+  "whitevector",
+  "whitevec",
+  "white",
+  "しろ",
+  "白",
+  "白ベク"
+]
 }

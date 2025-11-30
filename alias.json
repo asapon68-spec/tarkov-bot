@@ -154,5 +154,100 @@
   "Dorm room 110 key": [
     "110"
   ]
-
+  "Health Resort west wing room 205 key": [
+    "205"
+  ],
+  "Health Resort west wing room 218 key": [
+    "218"
+  ],
+  "Health Resort west wing room 222 key": [
+    "222"
+  ],
+  "Health Resort west wing room 301 key": [
+    "301"
+  ],
+  "Health Resort east wing room 205 key": [
+    "e205"
+  ],
+  "Health Resort east wing room 306 key": [
+    "e306"
+  ],
+  "Health Resort east wing room 322 key": [
+    "322"
+  ],
+  "Sanitar Office key": [
+    "san",
+    "sanitar"
+  ],
+  "RB-AM key": [
+    "am",
+    "rbam"
+  ],
+  "RB-VO key": [
+    "vo"
+  ],
+  "RB-MP11 key": [
+    "mp11"
+  ],
+  "RB-MP12 key": [
+    "mp12"
+  ],
+  "Military circuit board": [
+    "circuit",
+    "board"
+  ],
+  "Secure Flash drive": [
+    "flash",
+    "usb",
+    "drive"
+  ],
+  "Military Battery": [
+    "battery",
+    "bat"
+  ],
+  "Tushonka": [
+    "tus",
+    "tush"
+  ],
+  "Sugar": [
+    "sugar",
+    "suga"
+  ],
+  "Golden rooster": [
+    "rooster",
+    "golden"
+  ],
+  "Fierce blow sledgehammer": [
+    "hammer"
+  ],
+  "CMS surgical kit": [
+    "cms"
+  ],
+  "Surv12 Field surgical kit": [
+    "surv12",
+    "surv"
+  ],
+  "Car first aid kit": [
+    "car"
+  ],
+  "Ibuprofen painkiller": [
+    "ibuprofen",
+    "ibu"
+  ],
+  "Alu splint": [
+    "splint",
+    "alu"
+  ],
+  "Ammo case": [
+    "ammobox",
+    "ammocase"
+  ],
+  "Magazine case": [
+    "magbox",
+    "magcase"
+  ],
+  "Med case": [
+    "medbox",
+    "medcase"
+  ]
 }

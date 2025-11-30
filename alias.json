@@ -27,6 +27,7 @@
   "Secure Flash drive": ["flash", "usb", "drive", "フラッシュ"],
   "Tushonka": ["tus", "tush"],
   "Sugar": ["sugar", "suga", "砂糖"],
+  "Golden rooster": ["rooster", "golden", "ごーるど"],
   "Bronze lion": ["lion", "らいおん", "ライオン"],
   "Raven figurine": ["raven", "れいぶん"],
   "Sodium bicarbonate": ["bica", "びか"],
@@ -46,6 +47,7 @@
   "Chocolate bar Alionka": ["alionka", "ありおんか"],
   "Can of humpback salmon": ["salmon", "さーもん"],
   "Pack of oatflakes": ["oats", "おーつ"],
+
   "Reap-IR thermal scope": ["reap", "riap", "りーぷ"],
   "FLIR RS-32 2.25-9x 35mm 60Hz thermal riflescope": ["flir", "ふりる"],
   "Red Rebel ice pick": ["redrebel", "rebel", "れっれべ"],
@@ -74,18 +76,6 @@
   "Dorm room 110 key": ["110"],
   "Dorm room 114 key": ["114"],
   "Dorm room marked key": ["marked", "mark"],
-  "Health Resort west wing room 221 key": ["221"],
-  "Health Resort west wing room 222 key": ["222"],
-  "Health Resort west wing room 306 key": ["306"],
-  "Health Resort west wing room 301 key": ["301"],
-  "Health Resort west wing room 203 key": ["203"],
-  "Health Resort west wing room 322 key": ["322"],
-  "Health Resort east wing room 310 key": ["310"],
-  "Health Resort east wing room 218 key": ["218"],
-  "Health Resort east wing room 314 key": ["314"],
-  "Health Resort east wing room 205 key": ["e205"],
-  "Health Resort east wing room 306 key": ["e306"],
-  "Health Resort east wing room 322 key": ["322"],
 
   "Lab. keycard Blue": ["blue", "aoblue", "青"],
   "Lab. keycard Green": ["green", "midori", "緑"],
@@ -99,10 +89,6 @@
   "Golden egg": ["egg", "たまご", "卵"],
   "Physical Bitcoin": ["btc", "bitcoin"],
 
-  "Ammo case": ["ammobox", "ammocase"],
-  "Magazine case": ["magbox", "magcase"],
-  "Med case": ["medbox", "medcase"],
-
   "12x70 AP-20 Slug": ["ap20", "ap-20"],
   "5.56x45 M855A1": ["855a1", "m855a1", "a1"],
   "5.45x39 7N39": ["7n39"],
@@ -112,6 +98,7 @@
   "9x19 AP 6.3": ["ap63"],
   "5.45x39 BS": ["bs"],
   "9x39 BP": ["bp"],
+
   "AK-74N": ["ak74n", "74n", "よんなな"],
   "AKS-74U": ["aksu", "aks74u", "すー", "ゆー"],
   "AKM": ["akm", "えーけーえむ"],
@@ -167,7 +154,7 @@
   "SVD": ["svd"],
 
   "UMP .45 ACP": ["ump"],
-  
+
   "KRISS Vector .45 ACP (Black)": [
     "vector45",
     "vec45",

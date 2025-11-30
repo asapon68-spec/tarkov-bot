@@ -4,67 +4,62 @@ import discord
 import requests
 from rapidfuzz import process, fuzz
 
-# ================================
+# =========================
 # 設定
-# ================================
+# =========================
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
 TWITCH_URL = os.getenv("TWITCH_URL", "https://www.twitch.tv/jagami_orochi")
-ITEM_JSON_URL = os.getenv(
-    "ITEM_JSON_URL",
-    "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/items.json"
-)
+FUZZY_THRESHOLD = 60
 
+ITEM_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/items.json"
 ALIAS_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/alias.json"
-
-FUZZY_THRESHOLD = 25  # 曖昧検索の許容値（低いほど拾いやすい）
 
 if not DISCORD_TOKEN:
     raise SystemExit("❌ DISCORD_TOKEN が設定されていません")
 
 
-# ================================
-# JSON ロード
-# ================================
-def load_items():
+# =========================
+# GitHub JSON Loader
+# =========================
+def load_json(url):
     try:
-        print("📦 GitHubから items.json 読み込み中...")
-        r = requests.get(ITEM_JSON_URL, timeout=10)
+        r = requests.get(url, timeout=10)
         r.raise_for_status()
-        print("✅ items.json 読み込み成功")
         return r.json()
     except Exception as e:
-        print("❌ items.json読み込みエラー:", e)
+        print("❌ JSON読み込みエラー:", e)
         return {}
 
 
-def load_alias():
-    try:
-        print("📦 GitHubから alias.json 読み込み中...")
-        r = requests.get(ALIAS_JSON_URL, timeout=10)
-        r.raise_for_status()
-        print("👍 alias.json 読み込み成功")
-        return r.json()
-    except Exception as e:
-        print("⚠ alias.json読み込みエラー:", e)
-        return {}
+ITEM_DB = load_json(ITEM_JSON_URL)
+ALIAS_DB = load_json(ALIAS_JSON_URL)
 
-
-ITEM_DB = load_items()
 ITEM_NAMES = list(ITEM_DB.keys())
-ALIAS = load_alias()
 
 
-# ================================
-# Fuzzy検索
-# ================================
-def fuzzy_match(query):
-    result = process.extract(query, ITEM_NAMES, scorer=fuzz.WRatio, limit=5)
-    return [(name, score) for name, score, _ in result if score >= FUZZY_THRESHOLD]
+# =========================
+# アイテム検索処理（alias優先）
+# =========================
+def find_item(query):
+    q = query.lower()
+
+    # 1) alias search first
+    for real_name, aliases in ALIAS_DB.items():
+        if q in [a.lower() for a in aliases]:
+            return real_name
+
+    # 2) fuzzy search fallback
+    result = process.extract(q, ITEM_NAMES, scorer=fuzz.WRatio, limit=1)
+    best_name, score, _ = result[0]
+    if score >= FUZZY_THRESHOLD:
+        return best_name
+
+    return None
 
 
-# ================================
-# Discord クライアント
-# ================================
+# =========================
+# Discord BOT設定
+# =========================
 intents = discord.Intents.default()
 intents.message_content = True
 client = discord.Client(intents=intents)
@@ -84,63 +79,42 @@ async def on_message(message):
     if not content.startswith("!"):
         return
 
-    query = content[1:].strip().lower()
-
-    # ================================
-    # alias置換処理
-    # ================================
-    for official_name, aliases in ALIAS.items():
-        if query in [a.lower() for a in aliases]:
-            print(f"🔁 Alias変換: {query} -> {official_name}")
-            query = official_name.lower()
-            break
-
-    # ================================
-    # fuzzy検索
-    # ================================
-    matches = fuzzy_match(query)
-
-    if not matches:
-        # 候補提示
-        suggestions = process.extract(query, ITEM_NAMES, scorer=fuzz.WRatio, limit=3)
-        text = "\n".join([f"{i+1}. {s[0]}" for i, s in enumerate(suggestions)])
-        await message.channel.send(
-            f"❓ `{query}` に完全一致はありませんでした。\n\n"
-            f"📌 もしかして？\n{text}"
-        )
+    query = content[1:].strip()
+    if not query:
         return
 
-    best_name, score = matches[0]
-    item = ITEM_DB[best_name]
+    item_name = find_item(query)
+    if not item_name:
+        await message.channel.send(f"❌ `{query}` に一致するアイテムがありませんでした。")
+        return
 
-    # ================================
-    # trader price表示
-    # ================================
-    trader_text = "----"
-    if isinstance(item.get("trader_price"), dict):
-        trader_text = "\n".join(
-            f"{name}: {int(price):,}₽" for name, price in item["trader_price"].items()
-        )
+    item = ITEM_DB[item_name]
 
-    # ================================
-    # Embed生成
-    # ================================
     embed = discord.Embed(
-        title=best_name,
-        url=item.get("wiki", ""),
-        description=f"🔍 検索： `{content[1:]}`\n🎯 実クエリ： `{best_name}`",
+        title=item_name,
+        description=f"🔍 検索： `{query}`\n🎯 実クエリ： `{item_name}`",
         color=0x00AAFF,
     )
 
-    if item.get("icon"):
-        embed.set_thumbnail(url=item["icon"])
+    trader_info = item.get("trader_price")
+    trader_text = "----"
 
-    embed.add_field(name="💰 買取価格", value=trader_text, inline=False)
+    if isinstance(trader_info, dict):
+        tn = list(trader_info.keys())[0]
+        tp = trader_info[tn]
+        trader_text = f"{tn}: {tp:,}₽"
+
+    embed.add_field(
+        name="💰 買取価格",
+        value=f"{trader_text}",
+        inline=False,
+    )
+
     embed.add_field(
         name="📌 その他",
         value=(
-            f"タスク必要： **{item.get('task', '❌')}**\n"
-            f"ハイドアウト必要： **{item.get('hideout', '❌')}**"
+            f"タスク必要： {item.get('task')}\n"
+            f"ハイドアウト必要： {item.get('hideout')}"
         ),
         inline=False,
     )
@@ -148,15 +122,13 @@ async def on_message(message):
     embed.add_field(
         name="🔗 Twitch",
         value=f"[CLICK HERE]({TWITCH_URL})",
-        inline=False,
+        inline=False
     )
-
-    embed.set_footer(text="✨ FOLLOW ME ON TWITCH ✨")
 
     await message.channel.send(embed=embed)
 
 
-# ================================
+# =========================
 # RUN
-# ================================
+# =========================
 client.run(DISCORD_TOKEN)

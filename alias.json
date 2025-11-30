@@ -1,4 +1,4 @@
-{
+ {
   "Graphics card": ["gpu", "グラボ", "ぐらぼ"],
   "Gas analyzer": ["gas", "gasu", "ガスアナ", "がすあな"],
   "LEDX Skin Transilluminator": ["ledx", "ledex"],
@@ -77,12 +77,26 @@
   "Dorm room 114 key": ["114"],
   "Dorm room marked key": ["marked", "mark"],
 
+  "Health Resort west wing room 221 key": ["221"],
+  "Health Resort west wing room 222 key": ["222"],
+  "Health Resort west wing room 306 key": ["306"],
+  "Health Resort west wing room 301 key": ["301"],
+  "Health Resort west wing room 203 key": ["203"],
+  "Health Resort west wing room 322 key": ["322"],
+  "Health Resort east wing room 310 key": ["310"],
+  "Health Resort east wing room 218 key": ["218"],
+  "Health Resort east wing room 314 key": ["314"],
+  "Health Resort east wing room 205 key": ["e205"],
+  "Health Resort east wing room 306 key": ["e306"],
+  "Health Resort east wing room 322 key": ["322"],
+
   "Lab. keycard Blue": ["blue", "aoblue", "青"],
   "Lab. keycard Green": ["green", "midori", "緑"],
   "Lab. keycard Black": ["black", "kuro", "黒"],
   "Lab. keycard Violet": ["violet", "vio", "紫"],
   "Lab. keycard Red": ["red", "aka", "赤"],
   "Lab. keycard Yellow": ["yellow", "ki", "黄"],
+
   "Red keycard": ["rkey", "rkc", "redkc"],
   "Green keycard": ["gkey", "gkc"],
   "Violet keycard": ["vkey", "vkc"],
@@ -101,7 +115,7 @@
 
   "AK-74N": ["ak74n", "74n", "よんなな"],
   "AKS-74U": ["aksu", "aks74u", "すー", "ゆー"],
-  "AKM": ["akm", "えーけーえむ"],
+  "AKM": ["akm"],
   "AKMN": ["akmn"],
   "AK-103": ["103"],
   "AK-101": ["101"],
@@ -118,7 +132,6 @@
   "MCX .300": ["mcx"],
   "SCAR-L 5.56x45": ["scarl", "すかーえる"],
   "SCAR-H 7.62x51": ["scarh"],
-
   "RSASS": ["rsass"],
   "SR-25": ["sr25"],
   "MK-18 .338": ["mk18", "mk"],
@@ -155,28 +168,30 @@
 
   "UMP .45 ACP": ["ump"],
 
-  "KRISS Vector .45 ACP": [
+  "TDI KRISS Vector Gen.2 .45 ACP submachine gun": [
     "vector45",
     "vec45",
     "kriss45",
     "blackvector",
     "blackvec",
+    "black",
     "くろ",
     "黒",
     "黒ベク"
   ],
-  "KRISS Vector 9x19": [
+  "TDI KRISS Vector Gen.2 9x19 submachine gun": [
     "vector9",
     "vec9",
     "kriss9",
     "whitevector",
     "whitevec",
+    "white",
     "しろ",
     "白",
     "白ベク"
   ],
 
-  "Desert Tech MDR 5.56x45": [
+  "Desert Tech MDR 5.56x45 assault rifle": [
     "mdr556",
     "556mdr",
     "whitemdr",
@@ -185,7 +200,7 @@
     "白",
     "白mdr"
   ],
-  "Desert Tech MDR 7.62x51": [
+  "Desert Tech MDR 7.62x51 assault rifle": [
     "mdr762",
     "762mdr",
     "blackmdr",

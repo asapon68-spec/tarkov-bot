@@ -9,12 +9,10 @@ from rapidfuzz import process, fuzz
 # =========================
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
 TWITCH_URL = os.getenv("TWITCH_URL", "https://www.twitch.tv/jagami_orochi")
+FUZZY_THRESHOLD = 60
 
 ITEM_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/items.json"
 ALIAS_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/alias.json"
-
-FUZZY_THRESHOLD = 60
-MAX_RESULTS = 10  # ← 最大10件候補表示
 
 if not DISCORD_TOKEN:
     raise SystemExit("❌ DISCORD_TOKEN が設定されていません")
@@ -35,50 +33,115 @@ def load_json(url):
 
 ITEM_DB = load_json(ITEM_JSON_URL)
 ALIAS_DB = load_json(ALIAS_JSON_URL)
+
 ITEM_NAMES = list(ITEM_DB.keys())
 
 
 # =========================
-# 数字2桁以下は無視（仕様）
+# アイテム検索処理（alias → item名 → fuzzy）
 # =========================
-def is_too_short_numeric(query):
-    return query.isdigit() and len(query) <= 2
-
-
-# =========================
-# アイテム検索（複数候補）
-# =========================
-def search_items(query):
+def find_candidates(query):
     q = query.lower()
-    results = []
 
-    # --- 数字1〜2桁はヒットなし ---
-    if is_too_short_numeric(q):
+    # 🔒 1桁の数字 → 強制ノーヒット
+    if q.isdigit() and len(q) == 1:
         return []
 
-    # --- 1) alias 完全一致ヒット ---
-    alias_hits = []
+    candidates = set()
+
+    # 1) alias 完全一致
     for real_name, aliases in ALIAS_DB.items():
-        if q in [a.lower() for a in aliases]:
-            alias_hits.append(real_name)
+        for a in aliases:
+            if q == a.lower():
+            # 完全一致 alias は即リターン（唯一解扱い）
+                return [real_name]
 
-    if alias_hits:
-        return alias_hits[:MAX_RESULTS]
+    # 2) item.json の部分一致
+    for name in ITEM_NAMES:
+        if q in name.lower():
+            candidates.add(name)
 
-    # --- 2) items.json 内の部分一致 ---
-    partial = [name for name in ITEM_NAMES if q in name.lower()]
-    if partial:
-        return partial[:MAX_RESULTS]
+    # 3) fuzzy 検索（2件以上候補がある場合のみ追加）
+    fuzzy_hits = process.extract(q, ITEM_NAMES, scorer=fuzz.WRatio, limit=10)
+    for name, score, _ in fuzzy_hits:
+        if score >= FUZZY_THRESHOLD:
+            candidates.add(name)
 
-    # --- 3) fuzzy search fallback（複数candidate） ---
-    fuzzy = process.extract(q, ITEM_NAMES, scorer=fuzz.WRatio, limit=MAX_RESULTS)
-    fuzzy_hits = [name for name, score, _ in fuzzy if score >= FUZZY_THRESHOLD]
-
-    return fuzzy_hits
+    return list(candidates)
 
 
 # =========================
-# Discord BOT
+# Discord UI (選択ボタン)
+# =========================
+
+class ItemSelectView(discord.ui.View):
+    def __init__(self, items, query):
+        super().__init__(timeout=20)
+        self.query = query
+
+        # ボタンを自動生成（最大10件）
+        for name in items[:10]:
+            self.add_item(ItemButton(name))
+
+class ItemButton(discord.ui.Button):
+    def __init__(self, item_name):
+        super().__init__(label=item_name, style=discord.ButtonStyle.primary)
+        self.item_name = item_name
+
+    async def callback(self, interaction: discord.Interaction):
+        await show_item_detail(interaction, self.item_name, interaction.data["custom_id"])
+
+
+# =========================
+# アイテム詳細 Embed
+# =========================
+async def show_item_detail(interaction_or_channel, item_name, query):
+    item = ITEM_DB[item_name]
+
+    embed = discord.Embed(
+        title=item_name,
+        description=f"🔍 検索： `{query}`\n🎯 実クエリ： `{item_name}`",
+        color=0x00AAFF,
+    )
+
+    trader_info = item.get("trader_price")
+    trader_text = "----"
+
+    if isinstance(trader_info, dict):
+        tn = list(trader_info.keys())[0]
+        tp = trader_info[tn]
+        trader_text = f"{tn}: {tp:,}₽"
+
+    embed.add_field(
+        name="💰 買取価格",
+        value=f"{trader_text}",
+        inline=False,
+    )
+
+    embed.add_field(
+        name="📌 その他",
+        value=(
+            f"タスク必要： {item.get('task')}\n"
+            f"ハイドアウト必要： {item.get('hideout')}"
+        ),
+        inline=False,
+    )
+
+    embed.add_field(
+        name="",
+        value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
+        inline=False
+    )
+
+    # interaction か channel のどちらかに対応
+    if isinstance(interaction_or_channel, discord.Interaction):
+        await interaction_or_channel.response.edit_message(embed=embed, view=None)
+    else:
+        await interaction_or_channel.send(embed=embed)
+
+
+# =========================
+# Discord BOT設定
 # =========================
 intents = discord.Intents.default()
 intents.message_content = True
@@ -103,61 +166,24 @@ async def on_message(message):
     if not query:
         return
 
-    # ------------------------
-    # 検索
-    # ------------------------
-    hits = search_items(query)
+    candidates = find_candidates(query)
 
-    if not hits:
+    # ヒットなし
+    if not candidates:
         await message.channel.send(f"❌ `{query}` に一致するアイテムがありませんでした。")
         return
 
-    # ------------------------
-    # 候補が複数の場合
-    # ------------------------
-    if len(hits) > 1:
-        text = "🔍 **複数候補が見つかりました**\n"
-        for i, name in enumerate(hits, 1):
-            text += f"**{i}.** {name}\n"
-        text += "\n👉 **もっと絞って入力してね！**"
-        await message.channel.send(text)
+    # 1件だけ → 即表示
+    if len(candidates) == 1:
+        await show_item_detail(message.channel, candidates[0], query)
         return
 
-    # ------------------------
-    # 1件だけ
-    # ------------------------
-    item_name = hits[0]
-    item = ITEM_DB[item_name]
-
-    embed = discord.Embed(
-        title=item_name,
-        description=f"🔍 検索： `{query}`\n🎯 実クエリ： `{item_name}`",
-        color=0x00AAFF,
+    # 複数件 → 選択ボタン
+    view = ItemSelectView(candidates, query)
+    await message.channel.send(
+        f"🔍 **複数候補が見つかりました**\n押して選んでください👇",
+        view=view
     )
-
-    trader_info = item.get("trader_price")
-    trader_text = "----"
-
-    if isinstance(trader_info, dict) and trader_info:
-        tn = list(trader_info.keys())[0]
-        tp = trader_info[tn]
-        trader_text = f"{tn}: {tp:,}₽"
-
-    embed.add_field(name="💰 買取価格", value=trader_text, inline=False)
-
-    embed.add_field(
-        name="📌 その他",
-        value=f"タスク必要： {item.get('task')}\nハイドアウト必要： {item.get('hideout')}",
-        inline=False,
-    )
-
-    embed.add_field(
-        name="",
-        value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
-        inline=False,
-    )
-
-    await message.channel.send(embed=embed)
 
 
 # =========================

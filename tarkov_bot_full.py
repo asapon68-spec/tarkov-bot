@@ -3,6 +3,7 @@ import json
 import discord
 import requests
 from rapidfuzz import process, fuzz
+from discord.ui import View, Button
 
 # =========================
 # 設定
@@ -38,27 +39,29 @@ ITEM_NAMES = list(ITEM_DB.keys())
 
 
 # =========================
-# アイテム検索処理（alias優先）
+# alias検索＋曖昧一致
 # =========================
-def find_item(query):
+def find_candidates(query):
     q = query.lower()
+    candidates = []
 
-    # 1) alias search first
+    # alias検索
     for real_name, aliases in ALIAS_DB.items():
         if q in [a.lower() for a in aliases]:
-            return real_name
+            candidates.append(real_name)
 
-    # 2) fuzzy search fallback
-    result = process.extract(q, ITEM_NAMES, scorer=fuzz.WRatio, limit=1)
-    best_name, score, _ = result[0]
-    if score >= FUZZY_THRESHOLD:
-        return best_name
+    # fuzzy検索
+    fuzzy = process.extract(q, ITEM_NAMES, scorer=fuzz.WRatio, limit=5)
+    for name, score, _ in fuzzy:
+        if score >= FUZZY_THRESHOLD:
+            candidates.append(name)
 
-    return None
+    # 重複削除
+    return list(dict.fromkeys(candidates))
 
 
 # =========================
-# Discord BOT設定
+# Discord BOT
 # =========================
 intents = discord.Intents.default()
 intents.message_content = True
@@ -70,24 +73,10 @@ async def on_ready():
     print(f"🚀 BOT起動: {client.user}")
 
 
-@client.event
-async def on_message(message):
-    if message.author.bot:
-        return
-
-    content = message.content.strip()
-    if not content.startswith("!"):
-        return
-
-    query = content[1:].strip()
-    if not query:
-        return
-
-    item_name = find_item(query)
-    if not item_name:
-        await message.channel.send(f"❌ `{query}` に一致するアイテムがありませんでした。")
-        return
-
+# =========================
+# アイテム表示関数
+# =========================
+async def send_item_embed(message, item_name, query):
     item = ITEM_DB[item_name]
 
     embed = discord.Embed(
@@ -120,12 +109,80 @@ async def on_message(message):
     )
 
     embed.add_field(
-    name="",
-    value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
-    inline=False
-)
+        name="",
+        value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
+        inline=False
+    )
 
     await message.channel.send(embed=embed)
+
+
+# =========================
+# ボタン選択ビュー
+# =========================
+class ItemSelectView(View):
+    def __init__(self, message, query, user_id, candidates):
+        super().__init__(timeout=30)
+        self.message = message
+        self.query = query
+        self.user_id = user_id
+
+        for name in candidates:
+            self.add_item(ItemButton(label=name, item_name=name))
+
+
+class ItemButton(Button):
+    def __init__(self, label, item_name):
+        super().__init__(label=label[:80], style=discord.ButtonStyle.primary)
+        self.item_name = item_name
+
+    async def callback(self, interaction: discord.Interaction):
+        # 他人のボタン禁止
+        if interaction.user.id != self.view.user_id:
+            await interaction.response.send_message(
+                "❌ この選択肢はあなたの入力に対するものではありません。",
+                ephemeral=True
+            )
+            return
+
+        await interaction.response.defer()
+        await send_item_embed(self.view.message, self.item_name, self.view.query)
+        self.view.stop()
+
+
+# =========================
+# メッセージイベント
+# =========================
+@client.event
+async def on_message(message):
+    if message.author.bot:
+        return
+
+    content = message.content.strip()
+    if not content.startswith("!"):
+        return
+
+    query = content[1:].strip()
+    if not query:
+        return
+
+    candidates = find_candidates(query)
+
+    # 0件
+    if len(candidates) == 0:
+        await message.channel.send(f"❌ `{query}` に一致するアイテムがありませんでした。")
+        return
+
+    # 1件 → そのまま表示
+    if len(candidates) == 1:
+        await send_item_embed(message, candidates[0], query)
+        return
+
+    # 2個以上 → ボタン選択
+    view = ItemSelectView(message, query, message.author.id, candidates)
+
+    txt = "複数候補があります👇\n押して選んでください！"
+    await message.channel.send(txt, view=view)
 
 
 # =========================

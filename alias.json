@@ -1,4 +1,4 @@
- {
+{
   "Graphics card": ["gpu", "グラボ", "ぐらぼ"],
   "Gas analyzer": ["gas", "gasu", "ガスアナ", "がすあな"],
   "LEDX Skin Transilluminator": ["ledx", "ledex"],
@@ -8,7 +8,7 @@
   "Salewa first aid kit": ["salewa", "sarewa", "されわ"],
   "Propital": ["propi", "ぷろぴ", "プロピ"],
   "Morphine injector": ["morfi", "morphi", "もるふぃん"],
-  "GoldenStar balm": ["gold", "goldstar", "ごるすた", "ゴルスタ"],
+  "GoldenStar balm": ["goldstar", "gold", "ごるすた"],
   "Grizzly medical kit": ["griz", "grizzly", "ぐりず"],
   "CMS surgical kit": ["cms"],
   "Surv12 Field surgical kit": ["surv12", "surv"],
@@ -39,15 +39,14 @@
   "Can of Maxim energy drink": ["maxim", "max", "まっくす"],
   "Can of Lime juice": ["lime", "らいむ"],
   "Can of Squash Spread": ["squash", "すくわっしゅ"],
-  "Slickers chocolate bar": ["slick", "しりかーず"],
-  "Crackers": ["crack", "くりゅ"],
-  "Emelya rye croutons": ["emelya", "えめりゃ"],
-  "Army crackers": ["army", "くれーかー"],
+  "Slickers chocolate bar": ["slick"],
+  "Crackers": ["crack"],
+  "Emelya rye croutons": ["emelya"],
+  "Army crackers": ["army"],
   "Hot Rod": ["rod"],
-  "Chocolate bar Alionka": ["alionka", "ありおんか"],
-  "Can of humpback salmon": ["salmon", "さーもん"],
-  "Pack of oatflakes": ["oats", "おーつ"],
-
+  "Chocolate bar Alionka": ["alionka"],
+  "Can of humpback salmon": ["salmon"],
+  "Pack of oatflakes": ["oats"],
   "Reap-IR thermal scope": ["reap", "riap", "りーぷ"],
   "FLIR RS-32 2.25-9x 35mm 60Hz thermal riflescope": ["flir", "ふりる"],
   "Red Rebel ice pick": ["redrebel", "rebel", "れっれべ"],
@@ -73,6 +72,7 @@
   "Sanitar Office key": ["san", "sanitar"],
   "Ultra medical storage room key": ["ultra"],
   "Kiba store outlet key": ["kiba"],
+
   "Dorm room 110 key": ["110"],
   "Dorm room 114 key": ["114"],
   "Dorm room marked key": ["marked", "mark"],
@@ -83,6 +83,7 @@
   "Health Resort west wing room 301 key": ["301"],
   "Health Resort west wing room 203 key": ["203"],
   "Health Resort west wing room 322 key": ["322"],
+
   "Health Resort east wing room 310 key": ["310"],
   "Health Resort east wing room 218 key": ["218"],
   "Health Resort east wing room 314 key": ["314"],
@@ -103,6 +104,9 @@
   "Golden egg": ["egg", "たまご", "卵"],
   "Physical Bitcoin": ["btc", "bitcoin"],
 
+  "Ammo case": ["ammobox", "ammocase"],
+  "Magazine case": ["magbox", "magcase"],
+  "Med case": ["medbox", "medcase"],
   "12x70 AP-20 Slug": ["ap20", "ap-20"],
   "5.56x45 M855A1": ["855a1", "m855a1", "a1"],
   "5.45x39 7N39": ["7n39"],
@@ -132,6 +136,7 @@
   "MCX .300": ["mcx"],
   "SCAR-L 5.56x45": ["scarl", "すかーえる"],
   "SCAR-H 7.62x51": ["scarh"],
+
   "RSASS": ["rsass"],
   "SR-25": ["sr25"],
   "MK-18 .338": ["mk18", "mk"],
@@ -167,7 +172,6 @@
   "SVD": ["svd"],
 
   "UMP .45 ACP": ["ump"],
-
   "TDI KRISS Vector Gen.2 .45 ACP submachine gun": [
     "vector45",
     "vec45",
@@ -208,5 +212,5 @@
     "くろ",
     "黒",
     "黒mdr"
-  ]
-}
+  ],
+ 

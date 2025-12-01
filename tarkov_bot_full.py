@@ -40,7 +40,11 @@ ALIAS_DB = load_json(ALIAS_JSON_URL)
 
 ITEM_NAMES = list(ITEM_DB.keys())
 
-
+#print("===== DEBUG: JSON LOAD CHECK =====")
+print("Loaded alias count:", len(ALIAS_DB))
+print("Loaded items count:", len(ITEM_DB))
+print("Sample alias keys:", list(ALIAS_DB.keys())[:10])
+print("===================================")
 # =========================
 # 文字列正規化（ハイフン無視＋スペース無視）
 # =========================

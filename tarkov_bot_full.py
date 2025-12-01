@@ -15,8 +15,9 @@ ALIAS_FUZZY_THRESHOLD = 35   # alias fuzzy 甘め
 ITEM_FUZZY_THRESHOLD  = 65   # item fuzzy 少し厳しめ
 FUZZY_LIMIT = 10             # 最大10件
 
-ITEM_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/items.json"
-ALIAS_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/alias.json"
+# ▼▼ GitHub キャッシュ破壊用 v= を付けて強制最新読込 ▼▼
+ITEM_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/items.json?v=20251201a"
+ALIAS_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/alias.json?v=20251201a"
 
 if not DISCORD_TOKEN:
     raise SystemExit("❌ DISCORD_TOKEN が設定されていません")
@@ -27,6 +28,7 @@ if not DISCORD_TOKEN:
 # =========================
 def load_json(url):
     try:
+        print(f"📥 Fetching JSON from: {url}")
         r = requests.get(url, timeout=10)
         r.raise_for_status()
         return r.json()
@@ -40,26 +42,24 @@ ALIAS_DB = load_json(ALIAS_JSON_URL)
 
 ITEM_NAMES = list(ITEM_DB.keys())
 
-#print("===== DEBUG: JSON LOAD CHECK =====")
+print("===== DEBUG: JSON LOAD CHECK =====")
 print("Loaded alias count:", len(ALIAS_DB))
 print("Loaded items count:", len(ITEM_DB))
 print("Sample alias keys:", list(ALIAS_DB.keys())[:10])
 print("===================================")
+
+
 # =========================
-# 文字列正規化（ハイフン無視＋スペース無視）
+# 正規化（ハイフン除去 + スペース除去 + 小文字）
 # =========================
 def normalize(text: str) -> str:
     return text.replace("-", "").replace(" ", "").lower()
 
 
 # =========================
-# alias 検索用：逆引き辞書を作る
+# alias → item_name の逆引き辞書生成
 # =========================
 def build_alias_reverse_map():
-    """
-    alias → item_name の逆引き辞書
-    複数の item に同じ alias があっても上書きしない仕組み
-    """
     amap = {}
 
     for real_name, aliases in ALIAS_DB.items():
@@ -76,14 +76,14 @@ ALIAS_REVERSE = build_alias_reverse_map()
 
 
 # =========================
-# alias検索 ＋ items検索
+# 検索フロー（alias → items）
 # =========================
 def find_candidates(query: str):
     q_norm = normalize(query)
     candidates = []
 
     # ---- 1) alias fuzzy ----
-    alias_keys = list(ALIAS_REVERSE.keys())  # 正規化された alias の一覧
+    alias_keys = list(ALIAS_REVERSE.keys())
 
     alias_results = process.extract(
         q_norm,
@@ -94,7 +94,6 @@ def find_candidates(query: str):
 
     for alias_key, score, _ in alias_results:
         if score >= ALIAS_FUZZY_THRESHOLD:
-            # alias_key に紐づく全アイテム（複数可）
             for real in ALIAS_REVERSE.get(alias_key, []):
                 candidates.append(real)
 
@@ -111,7 +110,7 @@ def find_candidates(query: str):
         if score >= ITEM_FUZZY_THRESHOLD:
             candidates.append(name)
 
-    # ---- 重複排除 ----
+    # ---- 重複排除（順序保持）----
     return list(dict.fromkeys(candidates))
 
 
@@ -129,7 +128,7 @@ async def on_ready():
 
 
 # =========================
-# アイテム表示関数
+# アイテム埋め込み生成
 # =========================
 async def send_item_embed(message, item_name: str, query: str):
     item = ITEM_DB.get(item_name)
@@ -176,7 +175,7 @@ async def send_item_embed(message, item_name: str, query: str):
 
 
 # =========================
-# ボタン選択ビュー
+# ボタン生成
 # =========================
 class ItemSelectView(View):
     def __init__(self, message, query, user_id, candidates):
@@ -235,12 +234,12 @@ async def on_message(message):
         await send_item_embed(message, candidates[0], query)
         return
 
-    # 2件以上 → ボタン
+    # 2件以上
     view = ItemSelectView(message, query, message.author.id, candidates)
     await message.channel.send("🔍 複数候補があります👇\n押して選んでください！", view=view)
 
 
 # =========================
-# RUN
+# 起動
 # =========================
 client.run(DISCORD_TOKEN)

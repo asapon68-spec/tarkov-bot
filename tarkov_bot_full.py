@@ -2,15 +2,16 @@ import os
 import json
 import discord
 import requests
-import re
 from rapidfuzz import process, fuzz
+from discord.ui import View, Button
 
 # =========================
 # 設定
 # =========================
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
 TWITCH_URL = os.getenv("TWITCH_URL", "https://www.twitch.tv/jagami_orochi")
-FUZZY_THRESHOLD = 60
+FUZZY_THRESHOLD = 60          # あいまい検索のしきい値
+FUZZY_LIMIT = 10              # fuzzy候補最大件数
 
 ITEM_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/items.json"
 ALIAS_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/alias.json"
@@ -20,7 +21,7 @@ if not DISCORD_TOKEN:
 
 
 # =========================
-# JSON Loader
+# GitHub JSON Loader
 # =========================
 def load_json(url):
     try:
@@ -34,51 +35,55 @@ def load_json(url):
 
 ITEM_DB = load_json(ITEM_JSON_URL)
 ALIAS_DB = load_json(ALIAS_JSON_URL)
+
 ITEM_NAMES = list(ITEM_DB.keys())
 
 
 # =========================
-# 🔍 複数候補検索ロジック（v1.5.1）
+# 文字列正規化（ハイフン無視＋小文字）
 # =========================
-def fuzzy_search_candidates(query):
-    q = query.lower()
+def normalize(text: str) -> str:
+    return text.replace("-", "").replace(" ", "").lower()
 
-    # --- 数字抽出（例: d314 → 314） ---
-    numbers = re.findall(r"\d+", q)
 
-    # AP-20 / M855A1 / 556mdr など → 弾・武器なので数字抽出しない
-    is_ammo_like = (
-        "-" in q or 
-        re.match(r"^[a-z]+\d+[a-z0-9]*$", q)
+# =========================
+# alias検索＋曖昧一致
+# =========================
+def find_candidates(query: str):
+    """
+    - まず alias.json を優先して検索
+    - 次に items.json に対して fuzzy 検索
+    - ハイフン有り/無しは同じ扱い
+    - 最大 FUZZY_LIMIT 件まで候補を返す
+    """
+    q_raw = query.strip()
+    q_norm = normalize(q_raw)
+
+    candidates = []
+
+    # ---- 1) alias 検索 ----
+    for real_name, aliases in ALIAS_DB.items():
+        # alias も正規化して比較（ハイフン無視・小文字化）
+        if any(q_norm == normalize(a) for a in aliases):
+            candidates.append(real_name)
+
+    # ---- 2) fuzzy 検索 ----
+    # choices 側だけ normalize してスコア計算
+    fuzzy_results = process.extract(
+        q_norm,
+        ITEM_NAMES,
+        scorer=fuzz.WRatio,
+        processor=normalize,   # ITEM_NAME を normalize してから比較
+        limit=FUZZY_LIMIT
     )
 
-    if numbers and not is_ammo_like:
-        num = numbers[0]
+    for name, score, _ in fuzzy_results:
+        if score >= FUZZY_THRESHOLD:
+            candidates.append(name)
 
-        # 1〜2桁の数字は検索しない
-        if len(num) <= 2:
-            return []
-
-        # 数字3桁以上 → 名前に数字を含むアイテム
-        return [name for name in ITEM_NAMES if num in name.lower()]
-
-    # --- 通常 fuzzy search ---
-    results = process.extract(q, ITEM_NAMES, scorer=fuzz.WRatio, limit=20)
-    return [name for name, score, _ in results if score >= FUZZY_THRESHOLD]
-
-
-# =========================
-# エイリアス優先検索
-# =========================
-def find_item_exact(query):
-    q = query.lower()
-
-    # alias から検索
-    for real, alias_list in ALIAS_DB.items():
-        if q in [a.lower() for a in alias_list]:
-            return real
-
-    return None
+    # ---- 3) 重複排除（順番は維持）----
+    unique = list(dict.fromkeys(candidates))
+    return unique
 
 
 # =========================
@@ -95,57 +100,89 @@ async def on_ready():
 
 
 # =========================
-# ボタンUIクラス
+# アイテム表示関数
 # =========================
-class CandidateView(discord.ui.View):
-    def __init__(self, query, candidates):
-        super().__init__(timeout=20)
+async def send_item_embed(message, item_name: str, query: str):
+    item = ITEM_DB.get(item_name)
+    if not item:
+        await message.channel.send(f"❌ `{item_name}` のデータが見つかりませんでした。")
+        return
+
+    embed = discord.Embed(
+        title=item_name,
+        description=f"🔍 検索： `{query}`\n🎯 実クエリ： `{item_name}`",
+        color=0x00AAFF,
+    )
+
+    trader_info = item.get("trader_price")
+    trader_text = "----"
+
+    if isinstance(trader_info, dict) and trader_info:
+        tn = list(trader_info.keys())[0]
+        tp = trader_info[tn]
+        trader_text = f"{tn}: {tp:,}₽"
+
+    embed.add_field(
+        name="💰 買取価格",
+        value=trader_text,
+        inline=False,
+    )
+
+    embed.add_field(
+        name="📌 その他",
+        value=(
+            f"タスク必要： {item.get('task')}\n"
+            f"ハイドアウト必要： {item.get('hideout')}"
+        ),
+        inline=False,
+    )
+
+    embed.add_field(
+        name="",
+        value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
+        inline=False,
+    )
+
+    await message.channel.send(embed=embed)
+
+
+# =========================
+# ボタン選択ビュー
+# =========================
+class ItemSelectView(View):
+    def __init__(self, message, query, user_id, candidates):
+        super().__init__(timeout=30)
+        self.message = message
         self.query = query
-        self.candidates = candidates
+        self.user_id = user_id
 
-        for name in candidates[:10]:  # 最大10件
-            self.add_item(CandidateButton(label=name, item_name=name))
+        # 候補ごとにボタン追加（最大10件想定）
+        for name in candidates:
+            self.add_item(ItemButton(label=name, item_name=name))
 
 
-class CandidateButton(discord.ui.Button):
+class ItemButton(Button):
     def __init__(self, label, item_name):
-        super().__init__(label=label, style=discord.ButtonStyle.primary)
+        # ラベルは長すぎると切れるので 80 文字で丸め
+        super().__init__(label=label[:80], style=discord.ButtonStyle.primary)
         self.item_name = item_name
 
     async def callback(self, interaction: discord.Interaction):
-        item = ITEM_DB[self.item_name]
+        # 他人のボタン禁止
+        if interaction.user.id != self.view.user_id:
+            await interaction.response.send_message(
+                "❌ この選択肢はあなたの入力に対するものではありません。",
+                ephemeral=True
+            )
+            return
 
-        embed = discord.Embed(
-            title=self.item_name,
-            description=f"🔍 選択： `{self.label}`\n🎯 実クエリ： `{self.item_name}`",
-            color=0x00AAFF,
-        )
-
-        trader_info = item.get("trader_price")
-        trader_text = "----"
-
-        if isinstance(trader_info, dict):
-            tn = list(trader_info.keys())[0]
-            tp = trader_info[tn]
-            trader_text = f"{tn}: {tp:,}₽"
-
-        embed.add_field(name="💰 買取価格", value=trader_text, inline=False)
-        embed.add_field(
-            name="📌 その他",
-            value=f"タスク必要： {item.get('task')}\nハイドアウト必要： {item.get('hideout')}",
-            inline=False
-        )
-        embed.add_field(
-            name="",
-            value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
-            inline=False
-        )
-
-        await interaction.response.send_message(embed=embed)
+        await interaction.response.defer()
+        await send_item_embed(self.view.message, self.item_name, self.view.query)
+        self.view.stop()
 
 
 # =========================
-# メッセージ処理
+# メッセージイベント
 # =========================
 @client.event
 async def on_message(message):
@@ -160,57 +197,22 @@ async def on_message(message):
     if not query:
         return
 
-    # alias → 即決ヒット
-    item_name = find_item_exact(query)
-    if item_name:
-        candidates = [item_name]
-    else:
-        candidates = fuzzy_search_candidates(query)
+    candidates = find_candidates(query)
 
-    # No hit
-    if not candidates:
-        await message.channel.send(f"❌ `{query}` に一致するアイテムが見つかりませんでした")
+    # 0件
+    if len(candidates) == 0:
+        await message.channel.send(f"❌ `{query}` に一致するアイテムがありませんでした。")
         return
 
-    # Multiple hit → ボタン
-    if len(candidates) > 1:
-        await message.channel.send(
-            f"🔍 複数候補があります👇\n押して選んでください！",
-            view=CandidateView(query, candidates)
-        )
+    # 1件 → そのまま表示
+    if len(candidates) == 1:
+        await send_item_embed(message, candidates[0], query)
         return
 
-    # Single hit → 即表示
-    item_name = candidates[0]
-    item = ITEM_DB[item_name]
-
-    embed = discord.Embed(
-        title=item_name,
-        description=f"🔍 検索： `{query}`\n🎯 実クエリ： `{item_name}`",
-        color=0x00AAFF,
-    )
-
-    trader_info = item.get("trader_price")
-    trader_text = "----"
-
-    if isinstance(trader_info, dict):
-        tn = list(trader_info.keys())[0]
-        tp = trader_info[tn]
-        trader_text = f"{tn}: {tp:,}₽"
-
-    embed.add_field(name="💰 買取価格", value=trader_text, inline=False)
-    embed.add_field(
-        name="📌 その他",
-        value=f"タスク必要： {item.get('task')}\nハイドアウト必要： {item.get('hideout')}",
-        inline=False
-    )
-    embed.add_field(
-        name="",
-        value=f"[✨ FOLLOW 蛇神オロチ ON TWITCH ✨]({TWITCH_URL})",
-        inline=False
-    )
-
-    await message.channel.send(embed=embed)
+    # 2件以上 → ボタン選択
+    view = ItemSelectView(message, query, message.author.id, candidates)
+    txt = "🔍 複数候補があります👇　押して選んでください！"
+    await message.channel.send(txt, view=view)
 
 
 # =========================

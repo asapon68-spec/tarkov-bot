@@ -10,8 +10,9 @@ from discord.ui import View, Button
 # =========================
 DISCORD_TOKEN = os.getenv("DISCORD_TOKEN", "").strip()
 TWITCH_URL = os.getenv("TWITCH_URL", "https://www.twitch.tv/jagami_orochi")
-FUZZY_THRESHOLD = 60          # あいまい検索のしきい値
-FUZZY_LIMIT = 10              # fuzzy候補最大件数
+
+FUZZY_THRESHOLD = 60           # fuzzy検索の下限スコア
+FUZZY_LIMIT = 10               # fuzzy候補最大件数
 
 ITEM_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/items.json"
 ALIAS_JSON_URL = "https://raw.githubusercontent.com/asapon68-spec/tarkov-bot/main/alias.json"
@@ -21,11 +22,19 @@ if not DISCORD_TOKEN:
 
 
 # =========================
-# GitHub JSON Loader
+# GitHub JSON Loader（キャッシュ無視版）
 # =========================
 def load_json(url):
     try:
-        r = requests.get(url, timeout=10)
+        r = requests.get(
+            url,
+            timeout=10,
+            headers={
+                "Cache-Control": "no-cache",
+                "Pragma": "no-cache",
+                "Expires": "0"
+            }
+        )
         r.raise_for_status()
         return r.json()
     except Exception as e:
@@ -40,40 +49,38 @@ ITEM_NAMES = list(ITEM_DB.keys())
 
 
 # =========================
-# 文字列正規化（ハイフン無視＋小文字）
+# 正規化（ハイフン無視＋小文字化）
 # =========================
 def normalize(text: str) -> str:
+    """
+    ・ハイフン削除
+    ・スペース削除
+    ・小文字化
+    → AP-20 = AP20 = ap20 = aP-20 すべて同じ扱い
+    """
     return text.replace("-", "").replace(" ", "").lower()
 
 
 # =========================
-# alias検索＋曖昧一致
+# alias検索 + fuzzy検索
 # =========================
 def find_candidates(query: str):
-    """
-    - まず alias.json を優先して検索
-    - 次に items.json に対して fuzzy 検索
-    - ハイフン有り/無しは同じ扱い
-    - 最大 FUZZY_LIMIT 件まで候補を返す
-    """
     q_raw = query.strip()
     q_norm = normalize(q_raw)
 
     candidates = []
 
-    # ---- 1) alias 検索 ----
+    # ---- 1) alias検索 ----
     for real_name, aliases in ALIAS_DB.items():
-        # alias も正規化して比較（ハイフン無視・小文字化）
         if any(q_norm == normalize(a) for a in aliases):
             candidates.append(real_name)
 
-    # ---- 2) fuzzy 検索 ----
-    # choices 側だけ normalize してスコア計算
+    # ---- 2) fuzzy検索 ----
     fuzzy_results = process.extract(
         q_norm,
         ITEM_NAMES,
         scorer=fuzz.WRatio,
-        processor=normalize,   # ITEM_NAME を normalize してから比較
+        processor=normalize,     # アイテム名も normalize して比較
         limit=FUZZY_LIMIT
     )
 
@@ -81,9 +88,8 @@ def find_candidates(query: str):
         if score >= FUZZY_THRESHOLD:
             candidates.append(name)
 
-    # ---- 3) 重複排除（順番は維持）----
-    unique = list(dict.fromkeys(candidates))
-    return unique
+    # ---- 3) 重複削除（順序維持）----
+    return list(dict.fromkeys(candidates))
 
 
 # =========================
@@ -100,9 +106,10 @@ async def on_ready():
 
 
 # =========================
-# アイテム表示関数
+# 埋め込み送信
 # =========================
 async def send_item_embed(message, item_name: str, query: str):
+
     item = ITEM_DB.get(item_name)
     if not item:
         await message.channel.send(f"❌ `{item_name}` のデータが見つかりませんでした。")
@@ -114,6 +121,7 @@ async def send_item_embed(message, item_name: str, query: str):
         color=0x00AAFF,
     )
 
+    # ---- 買取価格 ----
     trader_info = item.get("trader_price")
     trader_text = "----"
 
@@ -122,12 +130,9 @@ async def send_item_embed(message, item_name: str, query: str):
         tp = trader_info[tn]
         trader_text = f"{tn}: {tp:,}₽"
 
-    embed.add_field(
-        name="💰 買取価格",
-        value=trader_text,
-        inline=False,
-    )
+    embed.add_field(name="💰 買取価格", value=trader_text, inline=False)
 
+    # ---- タスク/ハイドアウト ----
     embed.add_field(
         name="📌 その他",
         value=(
@@ -147,7 +152,7 @@ async def send_item_embed(message, item_name: str, query: str):
 
 
 # =========================
-# ボタン選択ビュー
+#  ボタンUI
 # =========================
 class ItemSelectView(View):
     def __init__(self, message, query, user_id, candidates):
@@ -156,19 +161,19 @@ class ItemSelectView(View):
         self.query = query
         self.user_id = user_id
 
-        # 候補ごとにボタン追加（最大10件想定）
+        # 最大 10 ボタン
         for name in candidates:
             self.add_item(ItemButton(label=name, item_name=name))
 
 
 class ItemButton(Button):
     def __init__(self, label, item_name):
-        # ラベルは長すぎると切れるので 80 文字で丸め
         super().__init__(label=label[:80], style=discord.ButtonStyle.primary)
         self.item_name = item_name
 
     async def callback(self, interaction: discord.Interaction):
-        # 他人のボタン禁止
+
+        # 自分以外のボタンは無効
         if interaction.user.id != self.view.user_id:
             await interaction.response.send_message(
                 "❌ この選択肢はあなたの入力に対するものではありません。",
@@ -182,10 +187,11 @@ class ItemButton(Button):
 
 
 # =========================
-# メッセージイベント
+# メッセージ受信
 # =========================
 @client.event
 async def on_message(message):
+
     if message.author.bot:
         return
 
@@ -199,23 +205,23 @@ async def on_message(message):
 
     candidates = find_candidates(query)
 
-    # 0件
+    # ---- 0件 ----
     if len(candidates) == 0:
         await message.channel.send(f"❌ `{query}` に一致するアイテムがありませんでした。")
         return
 
-    # 1件 → そのまま表示
+    # ---- 1件 ----
     if len(candidates) == 1:
         await send_item_embed(message, candidates[0], query)
         return
 
-    # 2件以上 → ボタン選択
+    # ---- 2件以上 ----
     view = ItemSelectView(message, query, message.author.id, candidates)
     txt = "🔍 複数候補があります👇　押して選んでください！"
     await message.channel.send(txt, view=view)
 
 
 # =========================
-# RUN
+# 起動
 # =========================
 client.run(DISCORD_TOKEN)

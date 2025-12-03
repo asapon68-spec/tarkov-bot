@@ -1090,7 +1090,11 @@
     }
   },
   "PC CPU": {
-    "task": "Signal - Part 2 ×3",
+    "task": [
+    "Signal - Part 2 ×3",
+    "Friend from Norvinsk - Part 4×2"
+    ],
+             
     "hideout": "❌",
     "trader_price": {
       "Therapist": 8765
@@ -1133,7 +1137,7 @@
     }
   },
   "RAM stick": {
-    "task": "❌",
+    "task": "Friend from Norvinsk - Part 4×4",
     "hideout": "❌",
     "trader_price": {
       "Therapist": 6908
